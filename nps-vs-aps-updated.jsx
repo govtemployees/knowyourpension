@@ -237,16 +237,16 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ Theme ════════════════════════════════════════════════════════════════════
 const T = {
-  bg:"#0d1017", surface:"rgba(255,255,255,0.04)", border:"rgba(255,255,255,0.08)",
-  borderLight:"rgba(255,255,255,0.12)", text:"#e8eaed",
-  textDim:"rgba(255,255,255,0.50)", textMuted:"rgba(255,255,255,0.30)",
-  aps:"#34d399", nps:"#fb923c", acc:"#60a5fa", dan:"#f87171",
-  apsGlow:"rgba(52,211,153,0.12)", npsGlow:"rgba(251,146,60,0.12)", accGlow:"rgba(96,165,250,0.10)",
+  bg:"#f0f4f8", surface:"#ffffff", border:"#d1d9e0",
+  borderLight:"#b8c4ce", text:"#1a2332",
+  textDim:"#4a5568", textMuted:"#8a9bb0",
+  aps:"#0a7c4e", nps:"#c05000", acc:"#1a56a0", dan:"#c0392b",
+  apsGlow:"rgba(10,124,78,0.08)", npsGlow:"rgba(192,80,0,0.08)", accGlow:"rgba(26,86,160,0.08)",
 };
-const glass = { background:T.surface, backdropFilter:"blur(40px) saturate(140%)", WebkitBackdropFilter:"blur(40px) saturate(140%)", border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)" };
-const glassSm = { ...glass, borderRadius:12, background:"rgba(255,255,255,0.06)", border:`1px solid ${T.borderLight}` };
-const glassCard = { ...glass, borderRadius:14, background:"rgba(255,255,255,0.05)", padding:"16px 18px" };
-const selStyle = { width:"100%", padding:"10px 12px", borderRadius:9, background:"rgba(255,255,255,0.06)", border:`1px solid rgba(255,255,255,0.12)`, color:"#e8eaed", fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
+const glass = { background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)" };
+const glassSm = { ...glass, borderRadius:12, background:"#ffffff", border:`1px solid ${T.borderLight}` };
+const glassCard = { ...glass, borderRadius:14, background:"#ffffff", padding:"16px 18px" };
+const selStyle = { width:"100%", padding:"10px 12px", borderRadius:9, background:"#ffffff", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
@@ -254,7 +254,7 @@ function GlassStat({ label, value, sub, color, icon, delay=0 }) {
   useEffect(()=>{ const t=setTimeout(()=>setV(true),delay); return()=>clearTimeout(t); },[]);
   return (
     <div style={{ ...glassCard, position:"relative", overflow:"hidden", transform:v?"translateY(0)":"translateY(10px)", opacity:v?1:0, transition:"all 0.5s cubic-bezier(0.22,1,0.36,1)" }}>
-      <div style={{ position:"absolute", top:-2, right:0, fontSize:36, opacity:0.06 }}>{icon}</div>
+      <div style={{ position:"absolute", top:-2, right:0, fontSize:36, opacity:0.08 }}>{icon}</div>
       <div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1.4, color:T.textMuted, marginBottom:5, fontWeight:600 }}>{label}</div>
       <div style={{ fontSize:20, fontWeight:700, color:color||T.text, letterSpacing:-0.5 }}>{typeof value==="number"?<Anim value={value}/>:value}</div>
       {sub&&<div style={{ fontSize:10, color:T.textMuted, marginTop:5, lineHeight:1.4 }}>{sub}</div>}
@@ -272,8 +272,8 @@ function GlassInput({ label, value, onChange, min, max, step, suffix, helpText }
       <div style={{ position:"relative" }}>
         <input type="number" value={str} min={min} max={max} step={step} placeholder="0"
           onChange={e=>{ setStr(e.target.value); const n=e.target.value===""?0:Number(e.target.value); if(!isNaN(n)) onChange(n); }}
-          style={{ width:"100%", padding:"10px 12px", paddingRight:suffix?38:12, borderRadius:9, background:"rgba(255,255,255,0.04)", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box" }}
-          onFocus={e=>{ e.target.style.borderColor="rgba(96,165,250,0.4)"; e.target.style.boxShadow="0 0 0 3px rgba(96,165,250,0.07)"; }}
+          style={{ width:"100%", padding:"10px 12px", paddingRight:suffix?38:12, borderRadius:9, background:"#f8fafc", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box" }}
+          onFocus={e=>{ e.target.style.borderColor="#1a56a0"; e.target.style.boxShadow="0 0 0 3px rgba(26,86,160,0.10)"; }}
           onBlur={e=>{ e.target.style.borderColor=T.border; e.target.style.boxShadow="none"; }}
         />
         {suffix&&<span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", fontSize:11, color:T.textMuted, fontWeight:600 }}>{suffix}</span>}
@@ -407,7 +407,7 @@ export default function App() {
   const TT = ({active,payload,label})=>{
     if (!active||!payload?.length) return null;
     return (
-      <div style={{ ...glassSm, padding:"11px 13px", fontSize:11, background:"rgba(13,16,23,0.95)" }}>
+      <div style={{ ...glassSm, padding:"11px 13px", fontSize:11, background:"#ffffff" }}>
         <div style={{ fontWeight:700, marginBottom:5, color:T.text }}>{label}</div>
         {payload.map((p,i)=>(
           <div key={i} style={{ display:"flex", alignItems:"center", gap:5, marginBottom:3 }}>
@@ -426,31 +426,29 @@ export default function App() {
 
   return (
     <div style={{ minHeight:"100vh", background:T.bg, color:T.text, fontFamily:"'DM Sans',-apple-system,sans-serif" }}>
-      {/* Ambient glow */}
+      {/* Subtle background texture */}
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
-        <div style={{ position:"absolute", top:"-15%", right:"-8%", width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 70%)", filter:"blur(80px)" }}/>
-        <div style={{ position:"absolute", top:"35%", left:"-12%", width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle, rgba(52,211,153,0.04) 0%, transparent 70%)", filter:"blur(80px)" }}/>
-        <div style={{ position:"absolute", bottom:"-10%", right:"15%", width:450, height:450, borderRadius:"50%", background:"radial-gradient(circle, rgba(251,146,60,0.04) 0%, transparent 70%)", filter:"blur(80px)" }}/>
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:5, background:"linear-gradient(90deg, #0a7c4e 0%, #1a56a0 50%, #0a7c4e 100%)" }}/>
       </div>
 
       <div style={{ position:"relative", zIndex:1, maxWidth:860, margin:"0 auto", padding: mob?"0 12px 28px":"0 20px 40px" }}>
 
         {/* ── HEADER ───────────────────────────────────────────── */}
-        <div style={{ padding: mob?"14px 0 12px":"20px 0 16px" }}>
+        <div style={{ padding: mob?"14px 0 12px":"20px 0 16px", borderBottom:`1px solid ${T.border}` }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
             <div style={{ display:"flex", alignItems:"center", gap:11 }}>
-              <div style={{ width:42, height:42, borderRadius:11, background:"linear-gradient(135deg,rgba(96,165,250,0.15),rgba(52,211,153,0.10))", border:`1px solid ${T.border}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>🏛️</div>
+              <div style={{ width:42, height:42, borderRadius:11, background:"linear-gradient(135deg,#e8f4fd,#edfaf5)", border:`1px solid ${T.border}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>🏛️</div>
               <div>
                 <h1 style={{ fontSize:mob?17:21, fontWeight:700, margin:0, color:T.text, lineHeight:1.2 }}>{t.title}</h1>
                 <p style={{ fontSize:11, color:T.textDim, margin:"2px 0 0" }}>{t.subtitle}</p>
               </div>
             </div>
             <div style={{ display:"flex", gap:6 }}>
-              <button onClick={()=>setLang(lang==="en"?"ml":"en")} style={{ padding:"7px 13px", borderRadius:100, border:`1px solid ${T.borderLight}`, background:"rgba(255,255,255,0.06)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:T.acc }}>
+              <button onClick={()=>setLang(lang==="en"?"ml":"en")} style={{ padding:"7px 13px", borderRadius:100, border:`1px solid ${T.borderLight}`, background:"#ffffff", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:T.acc }}>
                 {lang==="en"?"മലയാളം":"English"}
               </button>
               {R&&(
-                <button onClick={shareOnWhatsApp} style={{ padding:"7px 13px", borderRadius:100, border:"1px solid rgba(37,211,102,0.3)", background:"rgba(37,211,102,0.08)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:"#25d366", display:"flex", alignItems:"center", gap:5 }}>
+                <button onClick={shareOnWhatsApp} style={{ padding:"7px 13px", borderRadius:100, border:"1px solid rgba(37,180,80,0.4)", background:"rgba(37,211,102,0.06)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:"#25d366", display:"flex", alignItems:"center", gap:5 }}>
                   <WaIcon/>{mob?"":" "+t.whatsapp}
                 </button>
               )}
@@ -487,7 +485,7 @@ export default function App() {
 
         {/* ── EMPTY STATE ──────────────────────────────────────── */}
         {!R&&(
-          <div style={{ ...glass, padding:mob?"30px 18px":"38px", marginBottom:12, textAlign:"center", background:"rgba(96,165,250,0.03)", border:"1px solid rgba(96,165,250,0.09)" }}>
+          <div style={{ ...glass, padding:mob?"30px 18px":"38px", marginBottom:12, textAlign:"center", background:"#f0f6ff", border:"1px solid #c3d9f5" }}>
             <div style={{ fontSize:42, marginBottom:10 }}>👆</div>
             <div style={{ fontSize:16, fontWeight:700, color:T.text, marginBottom:7 }}>{t.fillDetails}</div>
             <div style={{ fontSize:12, color:T.textDim }}>{t.fillDetailsSub}</div>
@@ -499,14 +497,14 @@ export default function App() {
           <div style={{ ...glass, padding:pad, marginBottom:12 }}>
             <Sec icon="⚖️">{t.faceOff}</Sec>
 
-            <div style={{ marginBottom:13, padding:"8px 12px", borderRadius:9, background:"rgba(52,211,153,0.05)", border:"1px solid rgba(52,211,153,0.12)", fontSize:12, color:"#6ee7b7", display:"flex", gap:7, alignItems:"center", flexWrap:"wrap" }}>
+            <div style={{ marginBottom:13, padding:"8px 12px", borderRadius:9, background:"#f0fdf4", border:"1px solid #bbf7d0", fontSize:12, color:"#166534", display:"flex", gap:7, alignItems:"center", flexWrap:"wrap" }}>
               <span>🗓️</span>
               <span>{lang==="ml"?"വിരമിക്കൽ:":"Retirement:"} <strong>{retMonthName} {R.retYear}</strong> · {R.serviceYears} {lang==="ml"?"വർഷം സേവനം":"years service"}</span>
             </div>
 
             {/* APS vs NPS — stack on mobile */}
             <div style={{ display:"grid", gridTemplateColumns:mob?"1fr":"1fr 40px 1fr", alignItems:"center", gap:mob?9:12 }}>
-              <div style={{ textAlign:"center", padding:mob?"18px 12px":"22px 16px", borderRadius:14, background:`linear-gradient(145deg,${T.apsGlow},rgba(52,211,153,0.02))`, border:"1px solid rgba(52,211,153,0.15)" }}>
+              <div style={{ textAlign:"center", padding:mob?"18px 12px":"22px 16px", borderRadius:14, background:"linear-gradient(145deg,#f0faf5,#ffffff)", border:"1px solid rgba(52,211,153,0.15)" }}>
                 <div style={{ fontSize:9, fontWeight:700, color:T.aps, textTransform:"uppercase", letterSpacing:2, marginBottom:9 }}>{t.apsAssured}</div>
                 <div style={{ fontSize:mob?32:38, fontWeight:700, color:T.aps, letterSpacing:-1 }}><Anim value={pvOn?R.apsPV:R.apsP}/></div>
                 <div style={{ fontSize:11, color:T.textDim, marginTop:7 }}>{(R.apsFac*100).toFixed(0)}% of {fmtF(R.lB)}</div>
@@ -520,7 +518,7 @@ export default function App() {
                 : <div style={{ fontSize:16, textAlign:"center", color:T.textMuted, fontWeight:800 }}>VS</div>
               }
 
-              <div style={{ textAlign:"center", padding:mob?"18px 12px":"22px 16px", borderRadius:14, background:`linear-gradient(145deg,${T.npsGlow},rgba(251,146,60,0.02))`, border:"1px solid rgba(251,146,60,0.15)" }}>
+              <div style={{ textAlign:"center", padding:mob?"18px 12px":"22px 16px", borderRadius:14, background:"linear-gradient(145deg,#fff5ee,#ffffff)", border:"1px solid rgba(251,146,60,0.15)" }}>
                 <div style={{ fontSize:9, fontWeight:700, color:T.nps, textTransform:"uppercase", letterSpacing:2, marginBottom:9 }}>{t.npsNational}</div>
                 <div style={{ fontSize:mob?32:38, fontWeight:700, color:T.nps, letterSpacing:-1 }}><Anim value={pvOn?R.npsPV:R.npsP}/></div>
                 <div style={{ fontSize:11, color:T.textDim, marginTop:7 }}>40% @ {annRate}% · {fmt(pvOn?R.lumpPV:R.lump)} lump</div>
@@ -531,7 +529,7 @@ export default function App() {
             </div>
 
             {/* Winner bar */}
-            <div style={{ marginTop:14, padding:"12px 16px", borderRadius:11, background:R.apsP>R.npsP?`linear-gradient(135deg,${T.apsGlow},rgba(52,211,153,0.02))`:`linear-gradient(135deg,${T.npsGlow},rgba(251,146,60,0.02))`, border:`1px solid ${R.apsP>R.npsP?"rgba(52,211,153,0.15)":"rgba(251,146,60,0.15)"}`, textAlign:"center" }}>
+            <div style={{ marginTop:14, padding:"12px 16px", borderRadius:11, background:R.apsP>R.npsP?"linear-gradient(135deg,#f0faf5,#ffffff)":"linear-gradient(135deg,#fff5ee,#ffffff)", border:`1px solid ${R.apsP>R.npsP?"rgba(52,211,153,0.15)":"rgba(251,146,60,0.15)"}`, textAlign:"center" }}>
               <div style={{ fontSize:mob?13:15, fontWeight:700, color:R.apsP>R.npsP?T.aps:T.nps }}>
                 {R.apsP>R.npsP?"🛡️ APS":"📊 NPS"} pays {fmtF(Math.abs(R.apsP-R.npsP))}/month more
               </div>
@@ -540,7 +538,7 @@ export default function App() {
 
             {/* Today's value toggle */}
             <div style={{ display:"flex", flexDirection:"column", alignItems:"center", marginTop:13, gap:5 }}>
-              <button onClick={()=>setPvOn(!pvOn)} style={{ padding:mob?"10px 20px":"11px 26px", borderRadius:100, border:`2px solid ${pvOn?"rgba(96,165,250,0.5)":"rgba(255,255,255,0.11)"}`, background:pvOn?"linear-gradient(135deg,rgba(96,165,250,0.14),rgba(96,165,250,0.06))":"rgba(255,255,255,0.03)", cursor:"pointer", fontFamily:"inherit", fontSize:mob?12:14, fontWeight:700, color:pvOn?T.acc:T.textDim, boxShadow:pvOn?"0 0 18px rgba(96,165,250,0.10)":"none" }}>
+              <button onClick={()=>setPvOn(!pvOn)} style={{ padding:mob?"10px 20px":"11px 26px", borderRadius:100, border:`2px solid ${pvOn?"#1a56a0":"${T.border}"}`, background:pvOn?"linear-gradient(135deg,#1a56a0,#1e6abf)":"#ffffff", cursor:"pointer", fontFamily:"inherit", fontSize:mob?12:14, fontWeight:700, color:pvOn?"#ffffff":T.textDim, boxShadow:pvOn?"0 0 18px rgba(96,165,250,0.10)":"none" }}>
                 {pvOn?t.todayValueOn.replace("{{inf}}",inf):t.todayValue}
               </button>
               <p style={{ fontSize:10, color:T.textMuted, margin:0, textAlign:"center" }}>{t.todayValueHint}</p>
@@ -565,7 +563,7 @@ export default function App() {
           {/* ── TABS ─────────────────────────────────────────── */}
           <div style={{ display:"flex", gap:5, marginBottom:12, overflowX:"auto", paddingBottom:2 }}>
             {tabs.map(tb=>(
-              <button key={tb.id} onClick={()=>setTab(tb.id)} style={{ padding:mob?"7px 12px":"8px 16px", borderRadius:100, background:tab===tb.id?T.accGlow:"rgba(255,255,255,0.03)", border:tab===tb.id?"1px solid rgba(96,165,250,0.25)":`1px solid ${T.border}`, color:tab===tb.id?T.acc:T.textDim, cursor:"pointer", fontFamily:"inherit", fontSize:mob?11:12, fontWeight:600, whiteSpace:"nowrap" }}>
+              <button key={tb.id} onClick={()=>setTab(tb.id)} style={{ padding:mob?"7px 12px":"8px 16px", borderRadius:100, background:tab===tb.id?"#1a56a0":"#ffffff", border:tab===tb.id?"1px solid rgba(96,165,250,0.25)":`1px solid ${T.border}`, color:tab===tb.id?"#ffffff":T.textDim, cursor:"pointer", fontFamily:"inherit", fontSize:mob?11:12, fontWeight:600, whiteSpace:"nowrap" }}>
                 {tb.icon} {tb.label}
               </button>
             ))}
@@ -583,7 +581,7 @@ export default function App() {
                     <ResponsiveContainer width="100%" height={190}>
                       <PieChart><Pie data={ch.data} cx="50%" cy="50%" innerRadius={46} outerRadius={72} paddingAngle={4} dataKey="value" animationDuration={900}>
                         {ch.colors.map((c,j)=><Cell key={j} fill={c}/>)}
-                      </Pie><Tooltip formatter={v=>fmtF(v)} contentStyle={{background:"rgba(13,16,23,0.92)",border:`1px solid ${T.borderLight}`,borderRadius:9,fontSize:10}}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/></PieChart>
+                      </Pie><Tooltip formatter={v=>fmtF(v)} contentStyle={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:9,fontSize:10,color:T.text}}/><Legend wrapperStyle={{fontSize:10,color:T.textDim,paddingTop:8}}/></PieChart>
                     </ResponsiveContainer>
                   </div>
                 ))}
@@ -593,7 +591,7 @@ export default function App() {
                 <Sec icon="🕐" sub={t.revTimelineSub}>{t.revTimeline}</Sec>
                 <div style={{ display:"flex", gap:9, overflowX:"auto", paddingBottom:4, WebkitOverflowScrolling:"touch" }}>
                   {R.data.filter(d=>d.isRev).map(d=>(
-                    <div key={d.year} style={{ minWidth:150, padding:"11px 13px", borderRadius:11, flexShrink:0, background:d.revLabel?.includes("*")?T.accGlow:T.apsGlow, border:`1px solid ${d.revLabel?.includes("*")?"rgba(96,165,250,0.15)":"rgba(52,211,153,0.15)"}` }}>
+                    <div key={d.year} style={{ minWidth:150, padding:"11px 13px", borderRadius:11, flexShrink:0, background:d.revLabel?.includes("*")?"#eff6ff":"#f0fdf4", border:d.revLabel?.includes("*")?"1px solid #bfdbfe":"1px solid #bbf7d0" }}>
                       <div style={{ fontWeight:700, color:d.revLabel?.includes("*")?T.acc:T.aps, fontSize:11 }}>{d.revLabel}</div>
                       <div style={{ color:T.textDim, marginTop:4, fontSize:10 }}>Basic: {fmtF(d.basic)}</div>
                       <div style={{ color:T.textDim, fontSize:10 }}>DA: {d.daPct}%</div>
@@ -621,13 +619,13 @@ export default function App() {
                 <Sec icon="📈" sub={pvOn?`Today's ₹ at ${inf}% inflation`:"With increments, DA & revisions"}>Salary Growth</Sec>
                 <ResponsiveContainer width="100%" height={chartH}>
                   <ComposedChart data={R.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e8ecf0"/>
                     <XAxis dataKey="year" stroke={T.textMuted} fontSize={9} tickFormatter={v=>mob?`'${String(v).slice(2)}`:v}/>
                     <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
-                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
-                    <Area type="monotone" dataKey={pvOn?"annSalPV":"annSal"} name="Annual Salary" fill="rgba(52,211,153,0.08)" stroke={T.aps} strokeWidth={2}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim,paddingTop:8}}/>
+                    <Area type="monotone" dataKey={pvOn?"annSalPV":"annSal"} name="Annual Salary" fill="rgba(10,124,78,0.08)" stroke={T.aps} strokeWidth={2}/>
                     <Line type="monotone" dataKey="basic" name="Basic" stroke={T.acc} strokeWidth={1.5} dot={false}/>
-                    {R.data.filter(d=>d.isRev).map(d=><ReferenceLine key={d.year} x={d.year} stroke="rgba(248,113,113,0.18)" strokeDasharray="3 3"/>)}
+                    {R.data.filter(d=>d.isRev).map(d=><ReferenceLine key={d.year} x={d.year} stroke="rgba(192,57,43,0.25)" strokeDasharray="3 3"/>)}
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
@@ -635,12 +633,12 @@ export default function App() {
                 <Sec icon="🏦" sub={`Return: ${npsRet}%`}>NPS Corpus Growth</Sec>
                 <ResponsiveContainer width="100%" height={chartH}>
                   <AreaChart data={R.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e8ecf0"/>
                     <XAxis dataKey="year" stroke={T.textMuted} fontSize={9} tickFormatter={v=>mob?`'${String(v).slice(2)}`:v}/>
                     <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
-                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
-                    <Area type="monotone" dataKey={pvOn?"corpusPV":"corpus"} name="NPS Corpus" fill="rgba(251,146,60,0.08)" stroke={T.nps} strokeWidth={2}/>
-                    <Area type="monotone" dataKey="totC" name="Contributions" fill="rgba(96,165,250,0.05)" stroke={T.acc} strokeWidth={1.5}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim,paddingTop:8}}/>
+                    <Area type="monotone" dataKey={pvOn?"corpusPV":"corpus"} name="NPS Corpus" fill="rgba(192,80,0,0.08)" stroke={T.nps} strokeWidth={2}/>
+                    <Area type="monotone" dataKey="totC" name="Contributions" fill="rgba(26,86,160,0.06)" stroke={T.acc} strokeWidth={1.5}/>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -654,10 +652,10 @@ export default function App() {
                 <Sec icon="📊" sub={`APS: +${postDR}%/yr · NPS: Fixed`}>Monthly Pension</Sec>
                 <ResponsiveContainer width="100%" height={chartH}>
                   <LineChart data={R.post}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e8ecf0"/>
                     <XAxis dataKey="label" stroke={T.textMuted} fontSize={9}/>
                     <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
-                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim,paddingTop:8}}/>
                     <Line type="monotone" dataKey={pvOn?"apsPV":"apsP"} name="APS" stroke={T.aps} strokeWidth={2.5} dot={false}/>
                     <Line type="monotone" dataKey={pvOn?"npsPV":"npsP"} name="NPS" stroke={T.nps} strokeWidth={2.5} dot={false} strokeDasharray="6 3"/>
                   </LineChart>
@@ -667,12 +665,12 @@ export default function App() {
                 <Sec icon="💰">Cumulative Pension</Sec>
                 <ResponsiveContainer width="100%" height={chartH}>
                   <AreaChart data={R.post}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e8ecf0"/>
                     <XAxis dataKey="label" stroke={T.textMuted} fontSize={9}/>
                     <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
-                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
-                    <Area type="monotone" dataKey={pvOn?"cAP":"cA"} name="APS Total" fill="rgba(52,211,153,0.06)" stroke={T.aps} strokeWidth={2}/>
-                    <Area type="monotone" dataKey={pvOn?"cNP":"cN"} name="NPS Total" fill="rgba(251,146,60,0.05)" stroke={T.nps} strokeWidth={2}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim,paddingTop:8}}/>
+                    <Area type="monotone" dataKey={pvOn?"cAP":"cA"} name="APS Total" fill="rgba(10,124,78,0.07)" stroke={T.aps} strokeWidth={2}/>
+                    <Area type="monotone" dataKey={pvOn?"cNP":"cN"} name="NPS Total" fill="rgba(192,80,0,0.06)" stroke={T.nps} strokeWidth={2}/>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -680,7 +678,7 @@ export default function App() {
                 <Sec icon="📐">APS Advantage</Sec>
                 <ResponsiveContainer width="100%" height={mob?190:250}>
                   <BarChart data={R.post}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e8ecf0"/>
                     <XAxis dataKey="label" stroke={T.textMuted} fontSize={9}/>
                     <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
                     <Tooltip content={<TT/>}/>
@@ -707,7 +705,7 @@ export default function App() {
                   </thead>
                   <tbody>
                     {R.data.map((r,i)=>(
-                      <tr key={i} style={{borderBottom:`1px solid rgba(255,255,255,0.03)`,background:r.isRev?T.accGlow:"transparent"}}>
+                      <tr key={i} style={{borderBottom:`1px solid ${T.border}`,background:r.isRev?"#eff6ff":"transparent"}}>
                         <td style={{padding:"8px 6px",textAlign:"right",fontWeight:r.isRev?700:500,color:r.isRev?T.acc:T.text,fontSize:11}}>{r.year}</td>
                         <td style={{padding:"8px 6px",textAlign:"right",color:T.textMuted}}>{r.svc}</td>
                         <td style={{padding:"8px 6px",textAlign:"right",fontWeight:600,color:T.text}}>{fmtF(r.basic)}</td>
@@ -722,7 +720,7 @@ export default function App() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr style={{borderTop:`2px solid ${T.borderLight}`}}>
+                    <tr style={{borderTop:`2px solid ${T.border}`}}>
                       <td colSpan={5} style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.text}}>Totals →</td>
                       <td style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.acc}}>{fmt(R.empC)}</td>
                       <td style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.acc}}>{fmt(R.govC)}</td>
@@ -738,7 +736,7 @@ export default function App() {
         </>)}
 
         {/* ── DISCLAIMER ───────────────────────────────────────── */}
-        <div style={{ marginTop:12, padding:"12px 16px", borderRadius:13, fontSize:11, color:T.textMuted, lineHeight:1.7, background:"rgba(255,255,255,0.02)", border:`1px solid ${T.border}` }}>
+        <div style={{ marginTop:12, padding:"12px 16px", borderRadius:13, fontSize:11, color:T.textMuted, lineHeight:1.7, background:"#f8fafc", border:`1px solid ${T.border}` }}>
           <strong style={{color:T.textDim}}>⚠️ {lang==="ml"?"നിരാകരണം":"Disclaimer"}:</strong> {t.disclaimer}
         </div>
       </div>
