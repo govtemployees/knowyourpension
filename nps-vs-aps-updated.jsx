@@ -5,9 +5,121 @@ import {
   ComposedChart, ReferenceLine
 } from "recharts";
 
-// ═══ Kerala Pay Revision Logic ══════════════════════════════════════════════
-// type: "basic_only" → new_basic = basic * fitment
-// type: "merge"      → new_basic = (basic + DA) * fitment  (6–8% fitment on merged pay)
+// ═══ Responsive hook ════════════════════════════════════════════════════════
+function useIsMobile() {
+  const [mob, setMob] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    setMob(mq.matches);
+    const h = e => setMob(e.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, []);
+  return mob;
+}
+
+// ═══ Malayalam / English Translations ════════════════════════════════════════
+const ML = {
+  title: "NPS vs APS കാൽക്കുലേറ്റർ",
+  subtitle: "കേരള സർക്കാർ പെൻഷൻ താരതമ്യം",
+  configure: "നിങ്ങളുടെ വിവരങ്ങൾ നൽകുക",
+  configureSub: "കൃത്യമായ കണക്കുകൾക്ക് നിങ്ങളുടെ സേവന വിവരങ്ങൾ നൽകുക",
+  dob: "ജനന തീയതി",
+  joinYear: "സർവീസിൽ ചേർന്ന വർഷം",
+  retAge: "വിരമിക്കൽ പ്രായം",
+  basicPay: "നിലവിലെ അടിസ്ഥാന ശമ്പളം",
+  currentDA: "നിലവിലെ DA %",
+  annualDA: "വാർഷിക DA വർദ്ധന",
+  incRate: "വാർഷിക ഇൻക്രിമെന്റ്",
+  govtNPS: "സർക്കാർ NPS സംഭാവന",
+  existingCorpus: "നിലവിലെ NPS കോർപ്പസ്",
+  existingCorpusHelp: "നിലവിൽ NPS-ൽ ഉള്ള തുക (ഇല്ലെങ്കിൽ 0)",
+  advanced: "വിപുലമായ ക്രമീകരണങ്ങൾ",
+  npsReturn: "NPS റിട്ടേൺ നിരക്ക്",
+  annuityRate: "വാർഷിക നിരക്ക്",
+  postDR: "വിരമിക്കലിന് ശേഷമുള്ള DR",
+  inflation: "പണപ്പെരുപ്പ നിരക്ക്",
+  faceOff: "മാസ പെൻഷൻ താരതമ്യം",
+  apsAssured: "APS (ഉറപ്പ്)",
+  npsNational: "NPS (ദേശീയ)",
+  guaranteed: "✓ ഉറപ്പ്",
+  drIndexed: "✓ DR ഇൻഡക്സ്ഡ്",
+  lumpSum: "60% ഒറ്റത്തവണ",
+  noDR: "⚠ DR ഇല്ല",
+  todayValue: "📉 ഇന്നത്തെ മൂല്യം കാണുക",
+  todayValueOn: "📉 ഇന്നത്തെ മൂല്യം ({{inf}}%) — ഓൺ",
+  todayValueHint: "💡 ഭാവി തുകകൾ ഇന്നത്തെ ക്രയശക്തിയിൽ കാണാൻ ടാപ്പ് ചെയ്യുക",
+  npsCorpus: "NPS മൊത്തം കോർപ്പസ്",
+  npsLump: "NPS ഒറ്റത്തവണ (60%)",
+  lastBasic: "അവസാന Basic Pay",
+  service: "സേവനം",
+  noDCRG: "APS അല്ലെങ്കിൽ NPS-ൽ കേരള സർക്കാർ ജീവനക്കാർക്ക് DCRG ലഭിക്കില്ല.",
+  goNotice: "G.O.(P) No.33/2026/F.N തീയതി 28.02.2026: APS-ൽ ഒറ്റത്തവണ തുക ഉണ്ടാകില്ലെന്ന് G.O. സൂചിപ്പിക്കുന്നു.",
+  compare: "താരതമ്യം",
+  growth: "വളർച്ച",
+  postRetire: "ശേഷം",
+  details: "പട്ടിക",
+  fillDetails: "വിവരങ്ങൾ നൽകുക",
+  fillDetailsSub: "Basic Pay, DA%, ചേർന്ന വർഷം നൽകിയാൽ ഫലം ലഭിക്കും",
+  whatsapp: "WhatsApp ഷെയർ",
+  revTimeline: "പേ റിവിഷൻ ടൈംലൈൻ",
+  revTimelineSub: "സേവന കാലത്തെ ശമ്പള പരിഷ്കരണങ്ങൾ",
+  keyFacts: "പ്രധാന വസ്തുതകൾ",
+  retireNote: "കേരള സർക്കാർ ജീവനക്കാർ ജന്മ മാസത്തിൽ വിരമിക്കുന്നു",
+  disclaimer: "ഈ കാൽക്കുലേറ്റർ ഒരു ഏകദേശ ചിത്രം മാത്രം. ഔദ്യോഗിക കണക്കുകൾക്ക് പെൻഷൻ വിഭാഗവുമായി ബന്ധപ്പെടുക.",
+};
+
+const EN = {
+  title: "NPS vs APS Calculator",
+  subtitle: "Kerala Govt Pension Comparison",
+  configure: "Your Service Details",
+  configureSub: "Enter your details to generate personalised projections",
+  dob: "Date of Birth",
+  joinYear: "Year of Joining Service",
+  retAge: "Retirement Age",
+  basicPay: "Current Basic Pay (₹)",
+  currentDA: "Current DA %",
+  annualDA: "Annual DA Increase",
+  incRate: "Annual Increment",
+  govtNPS: "Govt NPS Contribution",
+  existingCorpus: "Existing NPS Corpus (₹)",
+  existingCorpusHelp: "Current NPS account balance (0 if none)",
+  advanced: "Advanced Settings",
+  npsReturn: "NPS Return Rate",
+  annuityRate: "Annuity Rate",
+  postDR: "Post-Retirement DR",
+  inflation: "Inflation Rate",
+  faceOff: "Monthly Pension Face-Off",
+  apsAssured: "APS (Assured)",
+  npsNational: "NPS (National)",
+  guaranteed: "✓ Guaranteed",
+  drIndexed: "✓ DR Indexed",
+  lumpSum: "60% Lump Sum",
+  noDR: "⚠ No DR",
+  todayValue: "📉 Show in Today's Value",
+  todayValueOn: "📉 Today's Value ({{inf}}% inflation) — ON",
+  todayValueHint: "💡 Tap to convert all amounts to present purchasing power",
+  npsCorpus: "NPS Total Corpus",
+  npsLump: "NPS Lump Sum (60%)",
+  lastBasic: "Last Basic Pay",
+  service: "Service",
+  noDCRG: "Kerala employees do NOT receive DCRG under APS or NPS.",
+  goNotice: "G.O.(P) No.33/2026/F.N dated 28.02.2026: Latest G.O. on APS does not mention any lump sum.",
+  compare: "Compare",
+  growth: "Growth",
+  postRetire: "Post-Retire",
+  details: "Table",
+  fillDetails: "Fill in your details above",
+  fillDetailsSub: "Enter Basic Pay, DA% and joining year to see your pension comparison",
+  whatsapp: "Share on WhatsApp",
+  revTimeline: "Revision Timeline",
+  revTimelineSub: "Pay revisions during your service",
+  keyFacts: "Key Facts",
+  retireNote: "Kerala Govt employees retire in their birth month",
+  disclaimer: "Illustrative only. Actual amounts depend on pay scales, promotions, DA rates & NPS performance. Consult your pension section for official figures.",
+};
+
+// ═══ Pay Revision Logic ══════════════════════════════════════════════════════
 const REVISIONS = [
   { year: 2026, month: 6, label: "12th Pay Rev (Jun 2026)",  fitment: 1.38, balanceDA: 4, type: "basic_only" },
   { year: 2031, month: 6, label: "13th Pay Rev (Jun 2031)*", fitment: 1.07, balanceDA: 4, type: "merge" },
@@ -19,797 +131,620 @@ const REVISIONS = [
   { year: 2061, month: 6, label: "19th Pay Rev (Jun 2061)*", fitment: 1.06, balanceDA: 3, type: "merge" },
 ];
 
-const fmt = v => { if (v >= 1e7) return `₹${(v/1e7).toFixed(2)} Cr`; if (v >= 1e5) return `₹${(v/1e5).toFixed(2)} L`; if (v >= 1e3) return `₹${(v/1e3).toFixed(1)}K`; return `₹${Math.round(v)}`; };
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const fmt  = v => { if (v>=1e7) return `₹${(v/1e7).toFixed(2)} Cr`; if (v>=1e5) return `₹${(v/1e5).toFixed(2)} L`; if (v>=1e3) return `₹${(v/1e3).toFixed(1)}K`; return `₹${Math.round(v)}`; };
 const fmtF = v => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(v);
-const pv = (fv, r, y) => y <= 0 ? fv : fv / Math.pow(1 + r/100, y);
+const pv   = (fv,r,y) => y<=0 ? fv : fv/Math.pow(1+r/100,y);
 
 function simulate(p) {
-  const birthYear = parseInt(p.dob.split("-")[0]);
+  const birthYear  = parseInt(p.dob.split("-")[0]);
   const birthMonth = parseInt(p.dob.split("-")[1]);
-  const retYear = birthYear + p.retAge;
+  // Kerala rule: retire in birth month at retAge
+  const retYear  = birthYear + p.retAge;
   const retMonth = birthMonth;
   const serviceYears = retYear - p.joinYear;
   if (serviceYears <= 0 || p.basic <= 0) return null;
 
   const CUR = 2026;
   const data = [];
-  let basic = p.basic;
-  let daPct = p.currentDA;
-  let corpus = 0, empC = 0, govC = 0;
-  const daPerHalf = Math.round(p.annualDA / 2);
+  let basic  = p.basic;
+  let daPct  = p.currentDA;
+  let corpus = p.existingCorpus || 0; // start from existing corpus
+  let empC = 0, govC = 0;
 
   for (let yr = p.joinYear; yr < retYear; yr++) {
     const svc = yr - p.joinYear + 1;
     const rev = REVISIONS.find(r => r.year === yr);
     if (rev && yr >= 2026) {
       if (rev.type === "merge") {
-        // Merge basic + accumulated DA, then apply fitment (6-8%)
         const preMergeDA = Math.round(basic * daPct / 100);
         basic = Math.ceil(((basic + preMergeDA) * rev.fitment) / 100) * 100;
       } else {
-        // 2026: only basic × 1.38, DA resets to balance
         basic = Math.ceil((basic * rev.fitment) / 100) * 100;
       }
       daPct = rev.balanceDA;
     }
-
-    const da = Math.round(basic * daPct / 100);
+    const da    = Math.round(basic * daPct / 100);
     const gross = basic + da;
-    const nE = Math.round(gross * 10 / 100);
-    const nG = Math.round(gross * p.govPct / 100);
-    const mC = nE + nG;
-    const aC = mC * 12;
-    empC += nE * 12;
-    govC += nG * 12;
+    const nE    = Math.round(gross * 10 / 100);
+    const nG    = Math.round(gross * p.govPct / 100);
+    const mC    = nE + nG;
+    const aC    = mC * 12;
+    empC += nE * 12; govC += nG * 12;
     corpus = corpus * (1 + p.npsRet / 100) + aC * (1 + p.npsRet / 200);
-
     const yFN = yr - CUR;
-    const iA = pv(1, p.inf, Math.max(0, yFN));
-
+    const iA  = pv(1, p.inf, Math.max(0, yFN));
     data.push({
       year: yr, svc, basic, daPct, da, gross,
-      annSal: gross * 12, annSalPV: Math.round(gross * 12 * iA),
+      annSal: gross*12, annSalPV: Math.round(gross*12*iA),
       nE, nG, mC, aC,
-      corpus: Math.round(corpus), corpusPV: Math.round(corpus * iA),
-      totC: empC + govC,
-      isRev: !!rev && yr >= 2026, revLabel: rev && yr >= 2026 ? rev.label : null,
+      corpus: Math.round(corpus), corpusPV: Math.round(corpus*iA),
+      totC: empC+govC,
+      isRev: !!rev && yr>=2026, revLabel: rev && yr>=2026 ? rev.label : null,
     });
-
-    basic = Math.round(basic * (1 + p.incRate / 100));
-    daPct += daPerHalf;
-    daPct += (p.annualDA - daPerHalf);
-    daPct = Math.round(daPct);
+    basic  = Math.round(basic * (1 + p.incRate / 100));
+    daPct += p.annualDA;
+    daPct  = Math.round(daPct);
   }
 
-  const last = data[data.length - 1];
+  const last = data[data.length-1];
   if (!last) return null;
 
-  const rYFN = retYear - CUR;
-  const rIA = pv(1, p.inf, Math.max(0, rYFN));
-  const qs = Math.min(serviceYears, 33);
+  const rYFN   = retYear - CUR;
+  const rIA    = pv(1, p.inf, Math.max(0, rYFN));
+  const qs     = Math.min(serviceYears, 33);
   const apsFac = qs >= 30 ? 0.50 : qs / 60;
-  const apsP = Math.round(last.basic * apsFac);
-  const fC = Math.round(corpus);
-  const lump = Math.round(fC * 0.60);
+  const apsP   = Math.round(last.basic * apsFac);
+  const fC     = Math.round(corpus);
+  const lump   = Math.round(fC * 0.60);
   const annCorp = Math.round(fC * 0.40);
-  const npsP = Math.round(annCorp * (p.annRate / 100) / 12);
-  const totC = empC + govC;
-  const totR = Math.max(0, fC - totC);
+  const npsP   = Math.round(annCorp * (p.annRate / 100) / 12);
+  const totC   = empC + govC;
+  const totR   = Math.max(0, fC - totC);
 
   const post = [];
-  let cA = 0, cN = 0, cAP = 0, cNP = 0, curA = apsP, curN = npsP;
-  for (let y = 0; y <= 25; y++) {
-    if (y > 0) curA = Math.round(curA * (1 + p.postDR / 100));
-    const pIA = pv(1, p.inf, Math.max(0, rYFN + y));
-    cA += curA * 12; cN += curN * 12;
-    cAP += Math.round(curA * 12 * pIA); cNP += Math.round(curN * 12 * pIA);
-    post.push({
-      year: y, label: y === 0 ? "Retire" : `+${y}yr`,
-      apsP: curA, npsP: curN,
-      apsPV: Math.round(curA * pIA), npsPV: Math.round(curN * pIA),
-      cA, cN, cAP, cNP,
-      adv: cA - cN, advPV: cAP - cNP,
-    });
+  let cA=0,cN=0,cAP=0,cNP=0,curA=apsP,curN=npsP;
+  for (let y=0; y<=25; y++) {
+    if (y>0) curA = Math.round(curA*(1+p.postDR/100));
+    const pIA = pv(1, p.inf, Math.max(0, rYFN+y));
+    cA+=curA*12; cN+=curN*12;
+    cAP+=Math.round(curA*12*pIA); cNP+=Math.round(curN*12*pIA);
+    post.push({ year:y, label: y===0?"Retire":`+${y}yr`, apsP:curA, npsP:curN, apsPV:Math.round(curA*pIA), npsPV:Math.round(curN*pIA), cA,cN,cAP,cNP, adv:cA-cN, advPV:cAP-cNP });
   }
-
-  let brk = null;
-  if (apsP > npsP) { const d = apsP - npsP; if (d > 0) brk = Math.ceil(lump / (d * 12)); }
-
-  return {
-    data, lB: last.basic, lD: last.da, lG: last.gross, lDP: last.daPct,
-    serviceYears, qs, retYear, retMonth, apsP, apsPV: Math.round(apsP * rIA), apsFac,
-    fC, lump, lumpPV: Math.round(lump * rIA), annCorp,
-    npsP, npsPV: Math.round(npsP * rIA),
-    empC, govC, totC, totR, post, brk, rIA,
-  };
+  let brk=null;
+  if (apsP>npsP) { const d=apsP-npsP; if (d>0) brk=Math.ceil(lump/(d*12)); }
+  return { data, lB:last.basic, lD:last.da, lG:last.gross, lDP:last.daPct, serviceYears, qs, retYear, retMonth, apsP, apsPV:Math.round(apsP*rIA), apsFac, fC, lump, lumpPV:Math.round(lump*rIA), annCorp, npsP, npsPV:Math.round(npsP*rIA), empC, govC, totC, totR, post, brk, rIA };
 }
 
-// ═══ Animated Number ════════════════════════════════════════════════════════
-function Anim({ value, format = fmtF }) {
+// ═══ Animated counter ════════════════════════════════════════════════════════
+function Anim({ value, format=fmtF }) {
   const [d, setD] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
-    const s = d, diff = value - s, st = performance.now();
+    const s=d, diff=value-s, st=performance.now();
     const run = now => {
-      const p = Math.min((now - st) / 700, 1);
-      setD(Math.round(s + diff * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) ref.current = requestAnimationFrame(run);
+      const p=Math.min((now-st)/700,1);
+      setD(Math.round(s+diff*(1-Math.pow(1-p,3))));
+      if (p<1) ref.current=requestAnimationFrame(run);
     };
-    ref.current = requestAnimationFrame(run);
-    return () => cancelAnimationFrame(ref.current);
+    ref.current=requestAnimationFrame(run);
+    return ()=>cancelAnimationFrame(ref.current);
   }, [value]);
   return <span>{format(d)}</span>;
 }
 
-// ═══ Dark Liquid Glass Theme ═══════════════════════════════════════════════
+// ═══ Theme ════════════════════════════════════════════════════════════════════
 const T = {
-  bg: "#0d1017",
-  surface: "rgba(255,255,255,0.04)",
-  surfaceHover: "rgba(255,255,255,0.07)",
-  border: "rgba(255,255,255,0.08)",
-  borderLight: "rgba(255,255,255,0.12)",
-  text: "#e8eaed",
-  textDim: "rgba(255,255,255,0.50)",
-  textMuted: "rgba(255,255,255,0.30)",
-  aps: "#34d399",
-  nps: "#fb923c",
-  acc: "#60a5fa",
-  dan: "#f87171",
-  apsGlow: "rgba(52,211,153,0.12)",
-  npsGlow: "rgba(251,146,60,0.12)",
-  accGlow: "rgba(96,165,250,0.10)",
+  bg:"#0d1017", surface:"rgba(255,255,255,0.04)", border:"rgba(255,255,255,0.08)",
+  borderLight:"rgba(255,255,255,0.12)", text:"#e8eaed",
+  textDim:"rgba(255,255,255,0.50)", textMuted:"rgba(255,255,255,0.30)",
+  aps:"#34d399", nps:"#fb923c", acc:"#60a5fa", dan:"#f87171",
+  apsGlow:"rgba(52,211,153,0.12)", npsGlow:"rgba(251,146,60,0.12)", accGlow:"rgba(96,165,250,0.10)",
 };
+const glass = { background:T.surface, backdropFilter:"blur(40px) saturate(140%)", WebkitBackdropFilter:"blur(40px) saturate(140%)", border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)" };
+const glassSm = { ...glass, borderRadius:12, background:"rgba(255,255,255,0.06)", border:`1px solid ${T.borderLight}` };
+const glassCard = { ...glass, borderRadius:14, background:"rgba(255,255,255,0.05)", padding:"16px 18px" };
+const selStyle = { width:"100%", padding:"10px 12px", borderRadius:9, background:"rgba(255,255,255,0.06)", border:`1px solid rgba(255,255,255,0.12)`, color:"#e8eaed", fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 
-const glass = {
-  background: T.surface,
-  backdropFilter: "blur(40px) saturate(140%)",
-  WebkitBackdropFilter: "blur(40px) saturate(140%)",
-  border: `1px solid ${T.border}`,
-  borderRadius: 22,
-  boxShadow: "0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
-};
-
-const glassSm = {
-  ...glass,
-  borderRadius: 16,
-  background: "rgba(255,255,255,0.06)",
-  border: `1px solid ${T.borderLight}`,
-  boxShadow: "0 2px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
-};
-
-const glassCard = {
-  ...glass,
-  borderRadius: 18,
-  background: "rgba(255,255,255,0.05)",
-  padding: "22px 24px",
-  boxShadow: "0 2px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
-};
-
-// ═══ Select dropdown style ═══════════════════════════════════════════════════
-const selectStyle = {
-  width: "100%", padding: "12px 16px",
-  borderRadius: 12,
-  background: "rgba(255,255,255,0.06)",
-  border: `1px solid rgba(255,255,255,0.12)`,
-  color: "#e8eaed", fontSize: 15, fontWeight: 500, outline: "none",
-  fontFamily: "inherit", boxSizing: "border-box",
-  cursor: "pointer",
-  appearance: "none", WebkitAppearance: "none",
-};
-
-function GlassStat({ label, value, sub, color, icon, delay = 0 }) {
+// ═══ Components ══════════════════════════════════════════════════════════════
+function GlassStat({ label, value, sub, color, icon, delay=0 }) {
   const [v, setV] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setV(true), delay); return () => clearTimeout(t); }, []);
+  useEffect(()=>{ const t=setTimeout(()=>setV(true),delay); return()=>clearTimeout(t); },[]);
   return (
-    <div style={{
-      ...glassCard, position: "relative", overflow: "hidden",
-      transform: v ? "translateY(0) scale(1)" : "translateY(16px) scale(0.97)",
-      opacity: v ? 1 : 0,
-      transition: "all 0.6s cubic-bezier(0.22,1,0.36,1)",
-    }}>
-      <div style={{ position: "absolute", top: -6, right: 0, fontSize: 48, opacity: 0.06, lineHeight: 1 }}>{icon}</div>
-      <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1.8, color: T.textMuted, marginBottom: 8, fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: color || T.text, letterSpacing: -0.5, fontFeatureSettings: "'tnum'" }}>
-        {typeof value === "number" ? <Anim value={value} /> : value}
-      </div>
-      {sub && <div style={{ fontSize: 12, color: T.textMuted, marginTop: 8, lineHeight: 1.5 }}>{sub}</div>}
+    <div style={{ ...glassCard, position:"relative", overflow:"hidden", transform:v?"translateY(0)":"translateY(10px)", opacity:v?1:0, transition:"all 0.5s cubic-bezier(0.22,1,0.36,1)" }}>
+      <div style={{ position:"absolute", top:-2, right:0, fontSize:36, opacity:0.06 }}>{icon}</div>
+      <div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1.4, color:T.textMuted, marginBottom:5, fontWeight:600 }}>{label}</div>
+      <div style={{ fontSize:20, fontWeight:700, color:color||T.text, letterSpacing:-0.5 }}>{typeof value==="number"?<Anim value={value}/>:value}</div>
+      {sub&&<div style={{ fontSize:10, color:T.textMuted, marginTop:5, lineHeight:1.4 }}>{sub}</div>}
     </div>
   );
 }
 
-// ═══ Number Input — shows empty instead of 0 ════════════════════════════════
-function GlassInput({ label, value, onChange, min, max, step, suffix, helpText, wide }) {
-  const [str, setStr] = useState(value === 0 ? "" : String(value));
-
-  // Sync local string only on external reset (when value goes back to 0 externally)
-  const prevRef = useRef(value);
-  useEffect(() => {
-    if (value !== prevRef.current) {
-      prevRef.current = value;
-      setStr(value === 0 ? "" : String(value));
-    }
-  }, [value]);
-
+function GlassInput({ label, value, onChange, min, max, step, suffix, helpText }) {
+  const [str, setStr] = useState(value===0?"":String(value));
+  const prev = useRef(value);
+  useEffect(()=>{ if (value!==prev.current){ prev.current=value; setStr(value===0?"":String(value)); } },[value]);
   return (
-    <div style={{ marginBottom: 0, gridColumn: wide ? "1 / -1" : undefined }}>
-      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: T.textDim, marginBottom: 6, letterSpacing: 0.2 }}>{label}</label>
-      <div style={{ position: "relative" }}>
-        <input
-          type="number" value={str} min={min} max={max} step={step}
-          placeholder="0"
-          onChange={e => {
-            setStr(e.target.value);
-            const n = e.target.value === "" ? 0 : Number(e.target.value);
-            if (!isNaN(n)) onChange(n);
-          }}
-          style={{
-            width: "100%", padding: "12px 16px",
-            paddingRight: suffix ? 44 : 16,
-            borderRadius: 12,
-            background: "rgba(255,255,255,0.04)",
-            border: `1px solid ${T.border}`,
-            color: T.text, fontSize: 15, fontWeight: 500, outline: "none",
-            fontFamily: "inherit", boxSizing: "border-box",
-            backdropFilter: "blur(20px)",
-            transition: "all 0.25s ease",
-          }}
-          onFocus={e => { e.target.style.borderColor = "rgba(96,165,250,0.4)"; e.target.style.boxShadow = "0 0 0 4px rgba(96,165,250,0.08)"; }}
-          onBlur={e => { e.target.style.borderColor = T.border; e.target.style.boxShadow = "none"; }}
+    <div>
+      <label style={{ display:"block", fontSize:11, fontWeight:600, color:T.textDim, marginBottom:4, letterSpacing:0.2 }}>{label}</label>
+      <div style={{ position:"relative" }}>
+        <input type="number" value={str} min={min} max={max} step={step} placeholder="0"
+          onChange={e=>{ setStr(e.target.value); const n=e.target.value===""?0:Number(e.target.value); if(!isNaN(n)) onChange(n); }}
+          style={{ width:"100%", padding:"10px 12px", paddingRight:suffix?38:12, borderRadius:9, background:"rgba(255,255,255,0.04)", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box" }}
+          onFocus={e=>{ e.target.style.borderColor="rgba(96,165,250,0.4)"; e.target.style.boxShadow="0 0 0 3px rgba(96,165,250,0.07)"; }}
+          onBlur={e=>{ e.target.style.borderColor=T.border; e.target.style.boxShadow="none"; }}
         />
-        {suffix && <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: T.textMuted, fontWeight: 600 }}>{suffix}</span>}
+        {suffix&&<span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", fontSize:11, color:T.textMuted, fontWeight:600 }}>{suffix}</span>}
       </div>
-      {helpText && <div style={{ fontSize: 11, color: T.textMuted, marginTop: 5 }}>{helpText}</div>}
+      {helpText&&<div style={{ fontSize:10, color:T.textMuted, marginTop:3 }}>{helpText}</div>}
     </div>
   );
 }
 
-// ═══ DOB Selector (Day / Month / Year selects) ════════════════════════════
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-function DOBSelector({ value, onChange }) {
-  const parts = value ? value.split("-") : ["1990","06","15"];
-  const [yr, setYr] = useState(parts[0]);
-  const [mo, setMo] = useState(parts[1]);
-  const [dy, setDy] = useState(parts[2]);
-
-  const daysInMonth = new Date(Number(yr), Number(mo), 0).getDate();
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const months = MONTHS.map((m, i) => ({ val: String(i + 1).padStart(2, "0"), label: m }));
-  const years = Array.from({ length: 45 }, (_, i) => 1960 + i); // 1960–2004
-
-  const emit = (y, m, d) => {
-    const safeDay = Math.min(Number(d), new Date(Number(y), Number(m), 0).getDate());
-    onChange(`${y}-${m}-${String(safeDay).padStart(2, "0")}`);
-  };
-
-  const sel = (setter, field) => e => {
-    const v = e.target.value;
-    setter(v);
-    if (field === "yr") emit(v, mo, dy);
-    else if (field === "mo") emit(yr, v, dy);
-    else emit(yr, mo, v);
-  };
-
+function DOBSelector({ value, onChange, label }) {
+  const parts = value?value.split("-"):["1990","06","15"];
+  const [yr,setYr]=useState(parts[0]); const [mo,setMo]=useState(parts[1]); const [dy,setDy]=useState(parts[2]);
+  const daysInMonth = new Date(Number(yr),Number(mo),0).getDate();
+  const emit=(y,m,d)=>{ const sd=Math.min(Number(d),new Date(Number(y),Number(m),0).getDate()); onChange(`${y}-${m}-${String(sd).padStart(2,"0")}`); };
+  const sel=(setter,field)=>e=>{ const v=e.target.value; setter(v); if(field==="yr")emit(v,mo,dy); else if(field==="mo")emit(yr,v,dy); else emit(yr,mo,v); };
+  const fields = [
+    {val:dy, fn:sel(setDy,"dy"), opts:Array.from({length:daysInMonth},(_,i)=>({v:String(i+1).padStart(2,"0"),l:String(i+1)}))},
+    {val:mo, fn:sel(setMo,"mo"), opts:MONTHS_FULL.map((m,i)=>({v:String(i+1).padStart(2,"0"),l:m}))},
+    {val:yr, fn:sel(setYr,"yr"), opts:Array.from({length:45},(_,i)=>({v:String(1960+i),l:String(1960+i)}))},
+  ];
   return (
-    <div style={{ marginBottom: 0 }}>
-      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: T.textDim, marginBottom: 6, letterSpacing: 0.2 }}>Date of Birth</label>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr 2fr", gap: 6 }}>
-        {/* Day */}
-        <div style={{ position: "relative" }}>
-          <select value={dy} onChange={sel(setDy, "dy")} style={selectStyle}>
-            {days.map(d => <option key={d} value={String(d).padStart(2,"0")}>{d}</option>)}
-          </select>
-          <span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:T.textMuted, fontSize:11 }}>▼</span>
-        </div>
-        {/* Month */}
-        <div style={{ position: "relative" }}>
-          <select value={mo} onChange={sel(setMo, "mo")} style={selectStyle}>
-            {months.map(m => <option key={m.val} value={m.val}>{m.label}</option>)}
-          </select>
-          <span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:T.textMuted, fontSize:11 }}>▼</span>
-        </div>
-        {/* Year */}
-        <div style={{ position: "relative" }}>
-          <select value={yr} onChange={sel(setYr, "yr")} style={selectStyle}>
-            {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
-          </select>
-          <span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:T.textMuted, fontSize:11 }}>▼</span>
-        </div>
+    <div>
+      <label style={{ display:"block", fontSize:11, fontWeight:600, color:T.textDim, marginBottom:4, letterSpacing:0.2 }}>{label}</label>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 2fr 1.3fr", gap:5 }}>
+        {fields.map((f,i)=>(
+          <div key={i} style={{ position:"relative" }}>
+            <select value={f.val} onChange={f.fn} style={selStyle}>{f.opts.map(o=><option key={o.v} value={o.v}>{o.l}</option>)}</select>
+            <span style={{ position:"absolute", right:7, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:T.textMuted, fontSize:9 }}>▼</span>
+          </div>
+        ))}
       </div>
-      <div style={{ fontSize: 11, color: T.textMuted, marginTop: 5 }}>Day / Month / Year</div>
+      <div style={{ fontSize:10, color:T.textMuted, marginTop:3 }}>Day / Month / Year</div>
     </div>
   );
 }
 
-// ═══ Joining Year Selector ════════════════════════════════════════════════
-function JoinYearSelector({ value, onChange }) {
-  const years = Array.from({ length: 42 }, (_, i) => 2004 + i); // 2004–2045
+function JoinYearSelector({ value, onChange, label }) {
+  const years=Array.from({length:42},(_,i)=>2004+i);
   return (
-    <div style={{ marginBottom: 0 }}>
-      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: T.textDim, marginBottom: 6, letterSpacing: 0.2 }}>Year of Joining Service</label>
-      <div style={{ position: "relative" }}>
-        <select value={value} onChange={e => onChange(Number(e.target.value))} style={selectStyle}>
-          {years.map(y => <option key={y} value={y}>{y}</option>)}
+    <div>
+      <label style={{ display:"block", fontSize:11, fontWeight:600, color:T.textDim, marginBottom:4, letterSpacing:0.2 }}>{label}</label>
+      <div style={{ position:"relative" }}>
+        <select value={value} onChange={e=>onChange(Number(e.target.value))} style={selStyle}>
+          {years.map(y=><option key={y} value={y}>{y}</option>)}
         </select>
-        <span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:T.textMuted, fontSize:11 }}>▼</span>
+        <span style={{ position:"absolute", right:7, top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:T.textMuted, fontSize:9 }}>▼</span>
       </div>
-      <div style={{ fontSize: 11, color: T.textMuted, marginTop: 5 }}>NPS applicable from 2004 onwards</div>
+      <div style={{ fontSize:10, color:T.textMuted, marginTop:3 }}>NPS applicable from 2004</div>
     </div>
   );
 }
 
 function Sec({ children, icon, sub }) {
   return (
-    <div style={{ marginBottom: 22 }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, color: T.text, display: "flex", alignItems: "center", gap: 10, margin: 0, letterSpacing: -0.3 }}>
-        <span style={{ fontSize: 24 }}>{icon}</span>{children}
+    <div style={{ marginBottom:16 }}>
+      <h2 style={{ fontSize:16, fontWeight:700, color:T.text, display:"flex", alignItems:"center", gap:8, margin:0 }}>
+        <span style={{ fontSize:18 }}>{icon}</span>{children}
       </h2>
-      {sub && <p style={{ fontSize: 13, color: T.textMuted, margin: "5px 0 0 34px" }}>{sub}</p>}
+      {sub&&<p style={{ fontSize:11, color:T.textMuted, margin:"3px 0 0 26px" }}>{sub}</p>}
     </div>
   );
 }
 
-function Pill({ children, color = T.acc }) {
-  return <span style={{ display: "inline-block", padding: "5px 12px", borderRadius: 100, fontSize: 11, fontWeight: 600, color, background: `${color}15`, border: `1px solid ${color}25` }}>{children}</span>;
+function Pill({ children, color=T.acc }) {
+  return <span style={{ display:"inline-block", padding:"3px 9px", borderRadius:100, fontSize:10, fontWeight:600, color, background:`${color}15`, border:`1px solid ${color}25` }}>{children}</span>;
 }
 
-function Note({ children, type = "info" }) {
-  const c = {
-    info: { bg: "rgba(96,165,250,0.06)", tx: "#93c5fd", ic: "ℹ️", bd: "rgba(96,165,250,0.12)" },
-    warn: { bg: "rgba(251,191,36,0.06)", tx: "#fcd34d", ic: "⚠️", bd: "rgba(251,191,36,0.12)" },
-    ok: { bg: "rgba(52,211,153,0.06)", tx: "#6ee7b7", ic: "✅", bd: "rgba(52,211,153,0.12)" },
-    bad: { bg: "rgba(248,113,113,0.06)", tx: "#fca5a5", ic: "🚫", bd: "rgba(248,113,113,0.12)" },
-  }[type];
+function Note({ children, type="info" }) {
+  const c={info:{bg:"rgba(96,165,250,0.06)",tx:"#93c5fd",ic:"ℹ️",bd:"rgba(96,165,250,0.12)"},warn:{bg:"rgba(251,191,36,0.06)",tx:"#fcd34d",ic:"⚠️",bd:"rgba(251,191,36,0.12)"},ok:{bg:"rgba(52,211,153,0.06)",tx:"#6ee7b7",ic:"✅",bd:"rgba(52,211,153,0.12)"},bad:{bg:"rgba(248,113,113,0.06)",tx:"#fca5a5",ic:"🚫",bd:"rgba(248,113,113,0.12)"}}[type];
   return (
-    <div style={{ padding: "14px 18px", borderRadius: 14, background: c.bg, border: `1px solid ${c.bd}`, fontSize: 13, color: c.tx, lineHeight: 1.6, display: "flex", gap: 10, backdropFilter: "blur(10px)" }}>
-      <span style={{ fontSize: 16, flexShrink: 0 }}>{c.ic}</span><div>{children}</div>
+    <div style={{ padding:"10px 13px", borderRadius:11, background:c.bg, border:`1px solid ${c.bd}`, fontSize:12, color:c.tx, lineHeight:1.55, display:"flex", gap:7 }}>
+      <span style={{ fontSize:13, flexShrink:0 }}>{c.ic}</span><div>{children}</div>
     </div>
   );
 }
 
-// ═══ Main App ═══════════════════════════════════════════════════════════════
+const WaIcon = ()=>(
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="#25d366">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+
+// ═══ MAIN APP ════════════════════════════════════════════════════════════════
 export default function App() {
+  const mob = useIsMobile();
+
   const [dob, setDob] = useState("1990-06-15");
   const [joinYear, setJoinYear] = useState(2021);
   const [retAge, setRetAge] = useState(60);
-  // All pay/rate inputs default to 0 — user must enter their own values
   const [basic, setBasic] = useState(0);
   const [currentDA, setCurrentDA] = useState(0);
   const [annualDA, setAnnualDA] = useState(0);
   const [incRate, setIncRate] = useState(0);
+  const [govPct, setGovPct] = useState(0);
+  const [existingCorpus, setExistingCorpus] = useState(0);
   const [npsRet, setNpsRet] = useState(0);
   const [annRate, setAnnRate] = useState(0);
-  const [govPct, setGovPct] = useState(0);
   const [postDR, setPostDR] = useState(0);
   const [inf, setInf] = useState(0);
   const [tab, setTab] = useState("compare");
   const [pvOn, setPvOn] = useState(false);
+  const [lang, setLang] = useState("en");
+  const t = lang==="ml" ? ML : EN;
 
-  const R = useMemo(() => simulate({
-    dob, joinYear, retAge, basic, currentDA, annualDA, incRate,
-    npsRet, annRate, govPct, postDR, inf,
-  }), [dob, joinYear, retAge, basic, currentDA, annualDA, incRate, npsRet, annRate, govPct, postDR, inf]);
+  const R = useMemo(()=>simulate({ dob, joinYear, retAge, basic, currentDA, annualDA, incRate, npsRet, annRate, govPct, postDR, inf, existingCorpus }),
+    [dob, joinYear, retAge, basic, currentDA, annualDA, incRate, npsRet, annRate, govPct, postDR, inf, existingCorpus]);
 
   const tabs = [
-    { id: "compare", label: "Compare", icon: "⚖️" },
-    { id: "growth", label: "Growth", icon: "📈" },
-    { id: "pension", label: "Post-Retire", icon: "🏖️" },
-    { id: "table", label: "Details", icon: "📋" },
+    {id:"compare",label:t.compare,icon:"⚖️"},
+    {id:"growth",label:t.growth,icon:"📈"},
+    {id:"pension",label:t.postRetire,icon:"🏖️"},
+    {id:"table",label:t.details,icon:"📋"},
   ];
 
-  const TT = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
+  const birthMonth    = parseInt(dob.split("-")[1]);
+  const birthYear     = parseInt(dob.split("-")[0]);
+  const retYearCalc   = birthYear + retAge;
+  const retMonthName  = MONTH_NAMES[birthMonth-1];
+
+  const shareOnWhatsApp = () => {
+    if (!R) return;
+    const winner = R.apsP>R.npsP?"APS":"NPS";
+    const diff   = fmtF(Math.abs(R.apsP-R.npsP));
+    const retStr = `${retMonthName} ${R.retYear}`;
+    const msg = lang==="ml"
+      ? `🏛️ എന്റെ പെൻഷൻ കണക്ക്\nknowyourpension.vercel.app\n\n📊 സേവനം: ${R.serviceYears} വർഷം\n🗓️ വിരമിക്കൽ: ${retStr}\n💰 Last Basic: ${fmtF(R.lB)}\n\n🛡️ APS: ${fmtF(R.apsP)}/മാസം\n📈 NPS: ${fmtF(R.npsP)}/മാസം\n🏦 NPS Corpus: ${fmt(R.fC)}\n\n✅ ${winner} ${diff} കൂടുതൽ\n\nകണക്കാക്കൂ 👇\nhttps://knowyourpension.vercel.app`
+      : `🏛️ My Pension Comparison\nknowyourpension.vercel.app\n\n📊 Service: ${R.serviceYears} yrs\n🗓️ Retire: ${retStr}\n💰 Last Basic: ${fmtF(R.lB)}\n\n🛡️ APS: ${fmtF(R.apsP)}/mo\n📈 NPS: ${fmtF(R.npsP)}/mo\n🏦 NPS Corpus: ${fmt(R.fC)}\n\n✅ ${winner} pays ${diff} more\n\nCalculate yours 👇\nhttps://knowyourpension.vercel.app`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+  };
+
+  const TT = ({active,payload,label})=>{
+    if (!active||!payload?.length) return null;
     return (
-      <div style={{ ...glassSm, padding: "14px 18px", fontSize: 12, background: "rgba(13,16,23,0.92)", border: `1px solid ${T.borderLight}` }}>
-        <div style={{ fontWeight: 700, marginBottom: 8, color: T.text, fontSize: 13 }}>{label}</div>
-        {payload.map((p, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <div style={{ width: 10, height: 10, borderRadius: 10, background: p.color }} />
-            <span style={{ color: T.textDim }}>{p.name}:</span>
-            <span style={{ color: T.text, fontWeight: 700, fontFeatureSettings: "'tnum'" }}>{fmt(p.value)}</span>
+      <div style={{ ...glassSm, padding:"11px 13px", fontSize:11, background:"rgba(13,16,23,0.95)" }}>
+        <div style={{ fontWeight:700, marginBottom:5, color:T.text }}>{label}</div>
+        {payload.map((p,i)=>(
+          <div key={i} style={{ display:"flex", alignItems:"center", gap:5, marginBottom:3 }}>
+            <div style={{ width:7, height:7, borderRadius:7, background:p.color }}/>
+            <span style={{ color:T.textDim }}>{p.name}:</span>
+            <span style={{ color:T.text, fontWeight:700 }}>{fmt(p.value)}</span>
           </div>
         ))}
       </div>
     );
   };
 
+  const pad  = mob ? "14px 14px" : "22px 24px";
+  const gCol = mob ? "1fr" : "repeat(auto-fill, minmax(185px, 1fr))";
+  const chartH = mob ? 230 : 300;
+
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: T.bg,
-      color: T.text,
-      fontFamily: "'DM Sans', -apple-system, 'SF Pro Display', sans-serif",
-    }}>
-      {/* Ambient glow orbs */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: "-15%", right: "-8%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div style={{ position: "absolute", top: "35%", left: "-12%", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(52,211,153,0.04) 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div style={{ position: "absolute", bottom: "-10%", right: "15%", width: 550, height: 550, borderRadius: "50%", background: "radial-gradient(circle, rgba(251,146,60,0.04) 0%, transparent 70%)", filter: "blur(80px)" }} />
+    <div style={{ minHeight:"100vh", background:T.bg, color:T.text, fontFamily:"'DM Sans',-apple-system,sans-serif" }}>
+      {/* Ambient glow */}
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:"-15%", right:"-8%", width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 70%)", filter:"blur(80px)" }}/>
+        <div style={{ position:"absolute", top:"35%", left:"-12%", width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle, rgba(52,211,153,0.04) 0%, transparent 70%)", filter:"blur(80px)" }}/>
+        <div style={{ position:"absolute", bottom:"-10%", right:"15%", width:450, height:450, borderRadius:"50%", background:"radial-gradient(circle, rgba(251,146,60,0.04) 0%, transparent 70%)", filter:"blur(80px)" }}/>
       </div>
 
-      <div style={{ position: "relative", zIndex: 1 }}>
-        {/* Header */}
-        <div style={{ padding: "24px 24px 20px", maxWidth: 1140, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{
-              width: 52, height: 52, borderRadius: 14,
-              background: "linear-gradient(135deg, rgba(96,165,250,0.15), rgba(52,211,153,0.10))",
-              border: `1px solid ${T.border}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 26, backdropFilter: "blur(20px)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-            }}>🏛️</div>
-            <div>
-              <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0, letterSpacing: -0.8, color: T.text }}>
-                NPS vs APS Calculator
-              </h1>
-              <p style={{ fontSize: 14, color: T.textDim, margin: "2px 0 0", fontWeight: 500 }}>
-                Kerala Contributory Pension Scheme
-              </p>
+      <div style={{ position:"relative", zIndex:1, maxWidth:860, margin:"0 auto", padding: mob?"0 12px 28px":"0 20px 40px" }}>
+
+        {/* ── HEADER ───────────────────────────────────────────── */}
+        <div style={{ padding: mob?"14px 0 12px":"20px 0 16px" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:11 }}>
+              <div style={{ width:42, height:42, borderRadius:11, background:"linear-gradient(135deg,rgba(96,165,250,0.15),rgba(52,211,153,0.10))", border:`1px solid ${T.border}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>🏛️</div>
+              <div>
+                <h1 style={{ fontSize:mob?17:21, fontWeight:700, margin:0, color:T.text, lineHeight:1.2 }}>{t.title}</h1>
+                <p style={{ fontSize:11, color:T.textDim, margin:"2px 0 0" }}>{t.subtitle}</p>
+              </div>
+            </div>
+            <div style={{ display:"flex", gap:6 }}>
+              <button onClick={()=>setLang(lang==="en"?"ml":"en")} style={{ padding:"7px 13px", borderRadius:100, border:`1px solid ${T.borderLight}`, background:"rgba(255,255,255,0.06)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:T.acc }}>
+                {lang==="en"?"മലയാളം":"English"}
+              </button>
+              {R&&(
+                <button onClick={shareOnWhatsApp} style={{ padding:"7px 13px", borderRadius:100, border:"1px solid rgba(37,211,102,0.3)", background:"rgba(37,211,102,0.08)", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:"#25d366", display:"flex", alignItems:"center", gap:5 }}>
+                  <WaIcon/>{mob?"":" "+t.whatsapp}
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 18px 40px" }}>
+        {/* ── CONFIGURE ────────────────────────────────────────── */}
+        <div style={{ ...glass, padding:pad, marginBottom:12 }}>
+          <Sec icon="⚙️" sub={t.configureSub}>{t.configure}</Sec>
 
-          {/* ═══ CONFIGURATION FIRST ═══ */}
-          <div style={{ ...glass, padding: 28, marginBottom: 20 }}>
-            <Sec icon="⚙️" sub="Enter your service details to generate personalised projections">Configure Your Profile</Sec>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 18 }}>
-              <DOBSelector value={dob} onChange={setDob} />
-              <JoinYearSelector value={joinYear} onChange={setJoinYear} />
-              <GlassInput label="Retirement Age" value={retAge} onChange={setRetAge} min={56} max={62} helpText="CPS: 60 years" />
-              <GlassInput label="Current Basic Pay (₹)" value={basic} onChange={setBasic} min={0} max={500000} suffix="₹" helpText="Your current basic pay" />
-              <GlassInput label="Current DA %" value={currentDA} onChange={setCurrentDA} min={0} max={100} suffix="%" helpText="Present DA rate (now ~35%)" />
-              <GlassInput label="Annual DA Increase" value={annualDA} onChange={setAnnualDA} min={0} max={12} suffix="%/yr" helpText="~6%/yr (3% per 6 months)" />
-              <GlassInput label="Annual Increment" value={incRate} onChange={setIncRate} min={0} max={10} step={0.5} suffix="%/yr" helpText="Yearly increment on basic" />
-              <GlassInput label="Govt NPS Contribution" value={govPct} onChange={setGovPct} min={0} max={14} suffix="%" helpText="Default 10%, max 14%" />
-            </div>
-
-            <div style={{ paddingTop: 14, borderTop: `1px solid ${T.border}`, marginTop: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: T.acc, marginBottom: 12 }}>Advanced / Return Settings</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: 18 }}>
-                <GlassInput label="NPS Return Rate" value={npsRet} onChange={setNpsRet} min={0} max={18} step={0.5} suffix="%" helpText="Historical: 9–12%" />
-                <GlassInput label="Annuity Rate" value={annRate} onChange={setAnnRate} min={0} max={10} step={0.5} suffix="%" />
-                <GlassInput label="Post-Retirement DR" value={postDR} onChange={setPostDR} min={0} max={10} step={0.5} suffix="%" helpText="APS indexed yearly" />
-                <GlassInput label="Inflation Rate" value={inf} onChange={setInf} min={0} max={15} step={0.5} suffix="%" helpText="For today's value calc" />
-              </div>
-            </div>
+          {/* Retirement month banner */}
+          <div style={{ marginBottom:14, padding:"9px 13px", borderRadius:9, background:"rgba(96,165,250,0.06)", border:"1px solid rgba(96,165,250,0.14)", fontSize:12, color:"#93c5fd", display:"flex", gap:7, alignItems:"center", flexWrap:"wrap" }}>
+            <span>🗓️</span>
+            <span>{t.retireNote} — <strong style={{color:T.acc}}>{lang==="ml"?"വിരമിക്കൽ: ":"Retirement: "}{retMonthName} {retYearCalc}</strong></span>
           </div>
 
-          {/* ═══ RESULTS — shown only when inputs are valid ═══ */}
-          {!R && (
-            <div style={{
-              ...glass, padding: 40, marginBottom: 20, textAlign: "center",
-              background: "rgba(96,165,250,0.04)", border: `1px solid rgba(96,165,250,0.12)`
-            }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>👆</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 8 }}>
-                Fill in your details above
-              </div>
-              <div style={{ fontSize: 14, color: T.textDim }}>
-                Enter your Basic Pay, DA%, joining year and retirement age to see your pension comparison
-              </div>
+          <div style={{ display:"grid", gridTemplateColumns:gCol, gap:11 }}>
+            <DOBSelector value={dob} onChange={setDob} label={t.dob}/>
+            <JoinYearSelector value={joinYear} onChange={setJoinYear} label={t.joinYear}/>
+            <GlassInput label={t.retAge} value={retAge} onChange={setRetAge} min={56} max={62} helpText="Kerala CPS: 60 yrs"/>
+            <GlassInput label={t.basicPay} value={basic} onChange={setBasic} min={0} max={500000} suffix="₹" helpText="Your current basic pay"/>
+            <GlassInput label={t.currentDA} value={currentDA} onChange={setCurrentDA} min={0} max={100} suffix="%" helpText="Current DA (~35%)"/>
+            <GlassInput label={t.annualDA} value={annualDA} onChange={setAnnualDA} min={0} max={12} suffix="%/yr" helpText="~6%/yr (3%×2)"/>
+            <GlassInput label={t.incRate} value={incRate} onChange={setIncRate} min={0} max={10} step={0.5} suffix="%/yr" helpText="Annual basic increment"/>
+            <GlassInput label={t.govtNPS} value={govPct} onChange={setGovPct} min={0} max={14} suffix="%" helpText="Default 10%, max 14%"/>
+            <GlassInput label={t.existingCorpus} value={existingCorpus} onChange={setExistingCorpus} min={0} suffix="₹" helpText={t.existingCorpusHelp}/>
+          </div>
+
+          <div style={{ paddingTop:13, borderTop:`1px solid ${T.border}`, marginTop:13 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:T.acc, marginBottom:10 }}>{t.advanced}</div>
+            <div style={{ display:"grid", gridTemplateColumns:gCol, gap:11 }}>
+              <GlassInput label={t.npsReturn} value={npsRet} onChange={setNpsRet} min={0} max={18} step={0.5} suffix="%" helpText="Historical: 9–12%"/>
+              <GlassInput label={t.annuityRate} value={annRate} onChange={setAnnRate} min={0} max={10} step={0.5} suffix="%"/>
+              <GlassInput label={t.postDR} value={postDR} onChange={setPostDR} min={0} max={10} step={0.5} suffix="%" helpText="APS indexed yearly"/>
+              <GlassInput label={t.inflation} value={inf} onChange={setInf} min={0} max={15} step={0.5} suffix="%" helpText="For today's value"/>
             </div>
-          )}
+          </div>
+        </div>
 
-          {/* ═══ RESULTS — Pension Face-Off ═══ */}
-          {R && <div style={{ ...glass, padding: 28, marginBottom: 20 }}>
-            <Sec icon="⚖️">Monthly Pension Face-Off</Sec>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 1fr", alignItems: "center", gap: 16 }}>
-              {/* APS */}
-              <div style={{
-                textAlign: "center", padding: "28px 20px", borderRadius: 20,
-                background: `linear-gradient(145deg, ${T.apsGlow}, rgba(52,211,153,0.02))`,
-                border: `1px solid rgba(52,211,153,0.15)`,
-                backdropFilter: "blur(20px)",
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.aps, textTransform: "uppercase", letterSpacing: 2.5, marginBottom: 14 }}>APS (Assured)</div>
-                <div style={{ fontSize: 40, fontWeight: 700, color: T.aps, letterSpacing: -1, fontFeatureSettings: "'tnum'" }}>
-                  <Anim value={pvOn ? R.apsPV : R.apsP} />
-                </div>
-                <div style={{ fontSize: 12, color: T.textDim, marginTop: 10 }}>
-                  {(R.apsFac * 100).toFixed(0)}% of Last Basic ({fmtF(R.lB)})
-                </div>
-                <div style={{ marginTop: 16, display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-                  <Pill color={T.aps}>✓ Guaranteed</Pill>
-                  <Pill color={T.aps}>✓ DR Indexed</Pill>
-                </div>
-              </div>
+        {/* ── EMPTY STATE ──────────────────────────────────────── */}
+        {!R&&(
+          <div style={{ ...glass, padding:mob?"30px 18px":"38px", marginBottom:12, textAlign:"center", background:"rgba(96,165,250,0.03)", border:"1px solid rgba(96,165,250,0.09)" }}>
+            <div style={{ fontSize:42, marginBottom:10 }}>👆</div>
+            <div style={{ fontSize:16, fontWeight:700, color:T.text, marginBottom:7 }}>{t.fillDetails}</div>
+            <div style={{ fontSize:12, color:T.textDim }}>{t.fillDetailsSub}</div>
+          </div>
+        )}
 
-              <div style={{ fontSize: 20, textAlign: "center", color: T.textMuted, fontWeight: 800 }}>VS</div>
+        {R&&(<>
+          {/* ── FACE-OFF ─────────────────────────────────────── */}
+          <div style={{ ...glass, padding:pad, marginBottom:12 }}>
+            <Sec icon="⚖️">{t.faceOff}</Sec>
 
-              {/* NPS */}
-              <div style={{
-                textAlign: "center", padding: "28px 20px", borderRadius: 20,
-                background: `linear-gradient(145deg, ${T.npsGlow}, rgba(251,146,60,0.02))`,
-                border: `1px solid rgba(251,146,60,0.15)`,
-                backdropFilter: "blur(20px)",
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.nps, textTransform: "uppercase", letterSpacing: 2.5, marginBottom: 14 }}>NPS (National)</div>
-                <div style={{ fontSize: 40, fontWeight: 700, color: T.nps, letterSpacing: -1, fontFeatureSettings: "'tnum'" }}>
-                  <Anim value={pvOn ? R.npsPV : R.npsP} />
-                </div>
-                <div style={{ fontSize: 12, color: T.textDim, marginTop: 10 }}>
-                  40% Annuity @ {annRate}% | Lump: {fmt(pvOn ? R.lumpPV : R.lump)}
-                </div>
-                <div style={{ marginTop: 16, display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-                  <Pill color={T.nps}>60% Lump Sum</Pill>
-                  <Pill color={T.dan}>⚠ No DR</Pill>
-                </div>
-              </div>
+            <div style={{ marginBottom:13, padding:"8px 12px", borderRadius:9, background:"rgba(52,211,153,0.05)", border:"1px solid rgba(52,211,153,0.12)", fontSize:12, color:"#6ee7b7", display:"flex", gap:7, alignItems:"center", flexWrap:"wrap" }}>
+              <span>🗓️</span>
+              <span>{lang==="ml"?"വിരമിക്കൽ:":"Retirement:"} <strong>{retMonthName} {R.retYear}</strong> · {R.serviceYears} {lang==="ml"?"വർഷം സേവനം":"years service"}</span>
             </div>
 
-            {/* Result bar */}
-            <div style={{
-              marginTop: 22, padding: "18px 24px", borderRadius: 16,
-              background: R.apsP > R.npsP
-                ? `linear-gradient(135deg, ${T.apsGlow}, rgba(52,211,153,0.03))`
-                : `linear-gradient(135deg, ${T.npsGlow}, rgba(251,146,60,0.03))`,
-              border: `1px solid ${R.apsP > R.npsP ? "rgba(52,211,153,0.15)" : "rgba(251,146,60,0.15)"}`,
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: R.apsP > R.npsP ? T.aps : T.nps }}>
-                {R.apsP > R.npsP ? "🛡️ APS" : "📊 NPS"} pays {fmtF(Math.abs(R.apsP - R.npsP))}/month more
-              </div>
-              {R.brk && R.apsP > R.npsP && (
-                <div style={{ fontSize: 13, color: T.textDim, marginTop: 8 }}>
-                  APS recovers NPS lump sum ({fmt(R.lump)}) in ~<strong style={{ color: T.text }}>{R.brk} years</strong> through higher pension + DR
+            {/* APS vs NPS — stack on mobile */}
+            <div style={{ display:"grid", gridTemplateColumns:mob?"1fr":"1fr 40px 1fr", alignItems:"center", gap:mob?9:12 }}>
+              <div style={{ textAlign:"center", padding:mob?"18px 12px":"22px 16px", borderRadius:14, background:`linear-gradient(145deg,${T.apsGlow},rgba(52,211,153,0.02))`, border:"1px solid rgba(52,211,153,0.15)" }}>
+                <div style={{ fontSize:9, fontWeight:700, color:T.aps, textTransform:"uppercase", letterSpacing:2, marginBottom:9 }}>{t.apsAssured}</div>
+                <div style={{ fontSize:mob?32:38, fontWeight:700, color:T.aps, letterSpacing:-1 }}><Anim value={pvOn?R.apsPV:R.apsP}/></div>
+                <div style={{ fontSize:11, color:T.textDim, marginTop:7 }}>{(R.apsFac*100).toFixed(0)}% of {fmtF(R.lB)}</div>
+                <div style={{ marginTop:10, display:"flex", gap:5, justifyContent:"center", flexWrap:"wrap" }}>
+                  <Pill color={T.aps}>{t.guaranteed}</Pill><Pill color={T.aps}>{t.drIndexed}</Pill>
                 </div>
-              )}
+              </div>
+
+              {mob
+                ? <div style={{ textAlign:"center", fontSize:13, color:T.textMuted, fontWeight:800 }}>── VS ──</div>
+                : <div style={{ fontSize:16, textAlign:"center", color:T.textMuted, fontWeight:800 }}>VS</div>
+              }
+
+              <div style={{ textAlign:"center", padding:mob?"18px 12px":"22px 16px", borderRadius:14, background:`linear-gradient(145deg,${T.npsGlow},rgba(251,146,60,0.02))`, border:"1px solid rgba(251,146,60,0.15)" }}>
+                <div style={{ fontSize:9, fontWeight:700, color:T.nps, textTransform:"uppercase", letterSpacing:2, marginBottom:9 }}>{t.npsNational}</div>
+                <div style={{ fontSize:mob?32:38, fontWeight:700, color:T.nps, letterSpacing:-1 }}><Anim value={pvOn?R.npsPV:R.npsP}/></div>
+                <div style={{ fontSize:11, color:T.textDim, marginTop:7 }}>40% @ {annRate}% · {fmt(pvOn?R.lumpPV:R.lump)} lump</div>
+                <div style={{ marginTop:10, display:"flex", gap:5, justifyContent:"center", flexWrap:"wrap" }}>
+                  <Pill color={T.nps}>{t.lumpSum}</Pill><Pill color={T.dan}>{t.noDR}</Pill>
+                </div>
+              </div>
             </div>
 
-            {/* Today's Value Toggle — prominent */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 20, gap: 8 }}>
-              <button onClick={() => setPvOn(!pvOn)} style={{
-                padding: "14px 32px", borderRadius: 100,
-                border: `2px solid ${pvOn ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.15)"}`,
-                background: pvOn
-                  ? "linear-gradient(135deg, rgba(96,165,250,0.18), rgba(96,165,250,0.08))"
-                  : "rgba(255,255,255,0.05)",
-                cursor: "pointer", fontFamily: "inherit",
-                fontSize: 16,         // bigger font
-                fontWeight: 700,
-                color: pvOn ? T.acc : T.textDim,
-                transition: "all 0.25s",
-                backdropFilter: "blur(10px)",
-                boxShadow: pvOn ? "0 0 24px rgba(96,165,250,0.15)" : "none",
-                letterSpacing: 0.2,
-              }}>
-                {pvOn
-                  ? `📉 Showing Today's Value (${inf}% inflation) — ON`
-                  : "📉 Show Amounts in Today's Value"}
+            {/* Winner bar */}
+            <div style={{ marginTop:14, padding:"12px 16px", borderRadius:11, background:R.apsP>R.npsP?`linear-gradient(135deg,${T.apsGlow},rgba(52,211,153,0.02))`:`linear-gradient(135deg,${T.npsGlow},rgba(251,146,60,0.02))`, border:`1px solid ${R.apsP>R.npsP?"rgba(52,211,153,0.15)":"rgba(251,146,60,0.15)"}`, textAlign:"center" }}>
+              <div style={{ fontSize:mob?13:15, fontWeight:700, color:R.apsP>R.npsP?T.aps:T.nps }}>
+                {R.apsP>R.npsP?"🛡️ APS":"📊 NPS"} pays {fmtF(Math.abs(R.apsP-R.npsP))}/month more
+              </div>
+              {R.brk&&R.apsP>R.npsP&&<div style={{ fontSize:11, color:T.textDim, marginTop:5 }}>APS recovers {fmt(R.lump)} lump in ~<strong style={{color:T.text}}>{R.brk} yrs</strong></div>}
+            </div>
+
+            {/* Today's value toggle */}
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", marginTop:13, gap:5 }}>
+              <button onClick={()=>setPvOn(!pvOn)} style={{ padding:mob?"10px 20px":"11px 26px", borderRadius:100, border:`2px solid ${pvOn?"rgba(96,165,250,0.5)":"rgba(255,255,255,0.11)"}`, background:pvOn?"linear-gradient(135deg,rgba(96,165,250,0.14),rgba(96,165,250,0.06))":"rgba(255,255,255,0.03)", cursor:"pointer", fontFamily:"inherit", fontSize:mob?12:14, fontWeight:700, color:pvOn?T.acc:T.textDim, boxShadow:pvOn?"0 0 18px rgba(96,165,250,0.10)":"none" }}>
+                {pvOn?t.todayValueOn.replace("{{inf}}",inf):t.todayValue}
               </button>
-              <p style={{ fontSize: 13, color: T.textMuted, margin: 0, textAlign: "center", maxWidth: 380 }}>
-                💡 Tap above to convert all future amounts to present-day purchasing power
-              </p>
+              <p style={{ fontSize:10, color:T.textMuted, margin:0, textAlign:"center" }}>{t.todayValueHint}</p>
             </div>
-          </div>}
-
-          {R && (<>
-          {/* Quick Stats */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 14, marginBottom: 20 }}>
-            <GlassStat label="NPS Total Corpus" icon="🏦" delay={0} value={pvOn ? Math.round(R.fC * R.rIA) : R.fC} sub={`Contrib: ${fmt(R.totC)} · Returns: ${fmt(R.totR)}`} color={T.acc} />
-            <GlassStat label="NPS Lump Sum (60%)" icon="💵" delay={80} value={pvOn ? R.lumpPV : R.lump} sub={pvOn ? "In today's purchasing power" : "Tax-free at retirement"} color={T.nps} />
-            <GlassStat label="Last Basic Pay" icon="💰" delay={160} value={R.lB} sub={`Gross: ${fmtF(R.lG)} · DA: ${R.lDP}%`} />
-            <GlassStat label="Service" icon="📅" delay={240} value={`${R.serviceYears} yrs`} sub={`${joinYear} → ${R.retYear} · Retire @ ${retAge}`} />
           </div>
 
-          {/* DCRG Warning */}
-          <div style={{ marginBottom: 20 }}>
-            <Note type="bad"><strong>No DCRG:</strong> Kerala state employees do NOT receive Death-cum-Retirement Gratuity under either APS or NPS.</Note>
+          {/* ── QUICK STATS ──────────────────────────────────── */}
+          <div style={{ display:"grid", gridTemplateColumns:mob?"1fr 1fr":"repeat(4,1fr)", gap:9, marginBottom:12 }}>
+            <GlassStat label={t.npsCorpus} icon="🏦" delay={0}   value={pvOn?Math.round(R.fC*R.rIA):R.fC} sub={`${fmt(R.totC)} contrib`} color={T.acc}/>
+            <GlassStat label={t.npsLump}   icon="💵" delay={60}  value={pvOn?R.lumpPV:R.lump} sub="60% at retire" color={T.nps}/>
+            <GlassStat label={t.lastBasic} icon="💰" delay={120} value={R.lB} sub={`Gross ${fmtF(R.lG)}`}/>
+            <GlassStat label={t.service}   icon="📅" delay={180} value={`${R.serviceYears}y`} sub={`→ ${retMonthName} ${R.retYear}`}/>
           </div>
 
-          {/* G.O. Notice */}
-          <div style={{ marginBottom: 20 }}>
-            <Note type="warn"><strong>⚠️ G.O.(P) No.33/2026/F.N dated 28.02.2026:</strong> The latest Government Order on the Assured Pension Scheme does <em>not</em> mention any lump sum payment. Until further clarification, employees should not assume a lump sum will be provided under APS.</Note>
+          {/* Notices */}
+          <div style={{ display:"flex", flexDirection:"column", gap:9, marginBottom:12 }}>
+            <Note type="bad"><strong>No DCRG:</strong> {t.noDCRG}</Note>
+            <Note type="warn"><strong>⚠️ {t.goNotice}</strong></Note>
+            {existingCorpus>0&&<Note type="ok"><strong>{lang==="ml"?"നിലവിലെ കോർപ്പസ്":"Existing corpus"} {fmt(existingCorpus)}</strong> {lang==="ml"?"പ്രൊജക്ഷനിൽ ഉൾപ്പെടുത്തി.":"included in NPS projection."}</Note>}
           </div>
 
-          {/* ═══ TABS ═══ */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 20, overflowX: "auto", paddingBottom: 2 }}>
-            {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{
-                padding: "10px 22px", borderRadius: 100,
-                background: tab === t.id ? T.accGlow : "rgba(255,255,255,0.03)",
-                border: tab === t.id ? `1px solid rgba(96,165,250,0.25)` : `1px solid ${T.border}`,
-                color: tab === t.id ? T.acc : T.textDim,
-                cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600,
-                whiteSpace: "nowrap", transition: "all 0.25s",
-                backdropFilter: "blur(20px)",
-              }}>{t.icon} {t.label}</button>
+          {/* ── TABS ─────────────────────────────────────────── */}
+          <div style={{ display:"flex", gap:5, marginBottom:12, overflowX:"auto", paddingBottom:2 }}>
+            {tabs.map(tb=>(
+              <button key={tb.id} onClick={()=>setTab(tb.id)} style={{ padding:mob?"7px 12px":"8px 16px", borderRadius:100, background:tab===tb.id?T.accGlow:"rgba(255,255,255,0.03)", border:tab===tb.id?"1px solid rgba(96,165,250,0.25)":`1px solid ${T.border}`, color:tab===tb.id?T.acc:T.textDim, cursor:"pointer", fontFamily:"inherit", fontSize:mob?11:12, fontWeight:600, whiteSpace:"nowrap" }}>
+                {tb.icon} {tb.label}
+              </button>
             ))}
           </div>
 
-          {/* ═══ COMPARE TAB ═══ */}
-          {tab === "compare" && (
+          {/* ── COMPARE ──────────────────────────────────────── */}
+          {tab==="compare"&&(
             <div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-                <div style={{ ...glass, padding: 24 }}>
-                  <Sec icon="🍩">NPS Corpus Sources</Sec>
-                  <ResponsiveContainer width="100%" height={230}>
-                    <PieChart><Pie data={[{ name: "Your 10%", value: R.empC }, { name: `Govt ${govPct}%`, value: R.govC }, { name: "Returns", value: R.totR }]} cx="50%" cy="50%" innerRadius={56} outerRadius={88} paddingAngle={4} dataKey="value" animationDuration={1000}>
-                      <Cell fill={T.nps} /><Cell fill={T.acc} /><Cell fill={T.aps} />
-                    </Pie><Tooltip formatter={v => fmtF(v)} contentStyle={{ background: "rgba(13,16,23,0.92)", border: `1px solid ${T.borderLight}`, borderRadius: 12, fontSize: 12, color: T.text }} /><Legend wrapperStyle={{ fontSize: 11, fontWeight: 600, color: T.textDim }} /></PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div style={{ ...glass, padding: 24 }}>
-                  <Sec icon="💰">Retirement Split</Sec>
-                  <ResponsiveContainer width="100%" height={230}>
-                    <PieChart><Pie data={[{ name: "Lump Sum 60%", value: R.lump }, { name: "Annuity 40%", value: R.annCorp }]} cx="50%" cy="50%" innerRadius={56} outerRadius={88} paddingAngle={4} dataKey="value" animationDuration={1000}>
-                      <Cell fill={T.nps} /><Cell fill={T.acc} />
-                    </Pie><Tooltip formatter={v => fmtF(v)} contentStyle={{ background: "rgba(13,16,23,0.92)", border: `1px solid ${T.borderLight}`, borderRadius: 12, fontSize: 12, color: T.text }} /><Legend wrapperStyle={{ fontSize: 11, fontWeight: 600, color: T.textDim }} /></PieChart>
-                  </ResponsiveContainer>
-                </div>
+              <div style={{ display:"grid", gridTemplateColumns:mob?"1fr":"1fr 1fr", gap:10, marginBottom:10 }}>
+                {[{title:"🍩 NPS Corpus Sources",data:[{name:"Your 10%",value:R.empC},{name:`Govt ${govPct}%`,value:R.govC},{name:"Returns",value:R.totR}],colors:[T.nps,T.acc,T.aps]},
+                  {title:"💰 Retirement Split",data:[{name:"Lump 60%",value:R.lump},{name:"Annuity 40%",value:R.annCorp}],colors:[T.nps,T.acc]}
+                ].map((ch,i)=>(
+                  <div key={i} style={{ ...glass, padding:pad }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:T.text, marginBottom:12 }}>{ch.title}</div>
+                    <ResponsiveContainer width="100%" height={190}>
+                      <PieChart><Pie data={ch.data} cx="50%" cy="50%" innerRadius={46} outerRadius={72} paddingAngle={4} dataKey="value" animationDuration={900}>
+                        {ch.colors.map((c,j)=><Cell key={j} fill={c}/>)}
+                      </Pie><Tooltip formatter={v=>fmtF(v)} contentStyle={{background:"rgba(13,16,23,0.92)",border:`1px solid ${T.borderLight}`,borderRadius:9,fontSize:10}}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/></PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ))}
               </div>
 
-              {/* Revision Timeline */}
-              <div style={{ ...glass, padding: 24, marginBottom: 20 }}>
-                <Sec icon="🕐" sub="Pay revisions during your service">Revision Timeline</Sec>
-                <div style={{ display: "flex", gap: 12, overflowX: "auto", padding: "4px 0" }}>
-                  {R.data.filter(d => d.isRev).map(d => (
-                    <div key={d.year} style={{
-                      minWidth: 180, padding: "14px 18px", borderRadius: 14, flexShrink: 0,
-                      background: d.revLabel?.includes("*") ? T.accGlow : T.apsGlow,
-                      border: `1px solid ${d.revLabel?.includes("*") ? "rgba(96,165,250,0.15)" : "rgba(52,211,153,0.15)"}`,
-                      backdropFilter: "blur(10px)",
-                    }}>
-                      <div style={{ fontWeight: 700, color: d.revLabel?.includes("*") ? T.acc : T.aps, fontSize: 13 }}>{d.revLabel}</div>
-                      <div style={{ color: T.textDim, marginTop: 6, fontSize: 12 }}>Basic: {fmtF(d.basic)}</div>
-                      <div style={{ color: T.textDim, fontSize: 12 }}>Gross: {fmtF(d.gross)} · DA: {d.daPct}%</div>
-                      {d.revLabel?.includes("*") && <div style={{ fontSize: 10, color: T.textMuted, marginTop: 4 }}>* Projected (Basic+DA merge + 6–7% fitment)</div>}
+              <div style={{ ...glass, padding:pad, marginBottom:10 }}>
+                <Sec icon="🕐" sub={t.revTimelineSub}>{t.revTimeline}</Sec>
+                <div style={{ display:"flex", gap:9, overflowX:"auto", paddingBottom:4, WebkitOverflowScrolling:"touch" }}>
+                  {R.data.filter(d=>d.isRev).map(d=>(
+                    <div key={d.year} style={{ minWidth:150, padding:"11px 13px", borderRadius:11, flexShrink:0, background:d.revLabel?.includes("*")?T.accGlow:T.apsGlow, border:`1px solid ${d.revLabel?.includes("*")?"rgba(96,165,250,0.15)":"rgba(52,211,153,0.15)"}` }}>
+                      <div style={{ fontWeight:700, color:d.revLabel?.includes("*")?T.acc:T.aps, fontSize:11 }}>{d.revLabel}</div>
+                      <div style={{ color:T.textDim, marginTop:4, fontSize:10 }}>Basic: {fmtF(d.basic)}</div>
+                      <div style={{ color:T.textDim, fontSize:10 }}>DA: {d.daPct}%</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Key Facts */}
-              <div style={{ ...glass, padding: 24 }}>
-                <Sec icon="📝">Key Facts</Sec>
-                <div style={{ display: "grid", gap: 12 }}>
-                  <Note type="ok"><strong>APS:</strong> 50% of <em>last Basic Pay</em> for 30+ yrs service. Proportionate for less (Years ÷ 60 × Basic).</Note>
-                  <Note type="info"><strong>NPS:</strong> Employee 10% + Govt {govPct}% of (Basic+DA) every month. Grows with DA, increments & revisions.</Note>
-                  <Note type="warn"><strong>APS pension grows</strong> with Dearness Relief ({postDR}%/yr) after retirement. NPS annuity is <em>fixed</em> — the gap widens every year.</Note>
-                  <Note type="info"><strong>12th Pay Rev (Jun 2026):</strong> Basic × 1.38. DA merges into basic, balance DA ~4%. Subsequent revisions every 5 years: Basic+DA × 1.06–1.07.</Note>
-                  <Note type="bad"><strong>No DCRG:</strong> Kerala does NOT give gratuity under APS or NPS. Plan your retirement savings accordingly.</Note>
+              <div style={{ ...glass, padding:pad }}>
+                <Sec icon="📝">{t.keyFacts}</Sec>
+                <div style={{ display:"grid", gap:9 }}>
+                  <Note type="ok"><strong>APS:</strong> 50% of last Basic for 30+ yrs. Less service: (Yrs÷60)×Basic.</Note>
+                  <Note type="info"><strong>NPS:</strong> Emp 10% + Govt {govPct}% of (Basic+DA) monthly. Grows with DA, increments & revisions.</Note>
+                  <Note type="warn"><strong>APS</strong> grows with DR ({postDR}%/yr) after retirement. NPS annuity is <em>fixed</em> — gap widens yearly.</Note>
+                  <Note type="info"><strong>12th Pay Rev (Jun 2026):</strong> Basic×1.38, DA resets to 4%. Next revisions every 5 years.</Note>
                 </div>
               </div>
             </div>
           )}
 
-          {/* ═══ GROWTH TAB ═══ */}
-          {tab === "growth" && (
+          {/* ── GROWTH ───────────────────────────────────────── */}
+          {tab==="growth"&&(
             <div>
-              <div style={{ ...glass, padding: 28, marginBottom: 20 }}>
-                <Sec icon="📈" sub={pvOn ? `Today's ₹ at ${inf}% inflation` : "With increments, DA & pay revisions"}>Salary Growth</Sec>
-                <ResponsiveContainer width="100%" height={380}>
+              <div style={{ ...glass, padding:pad, marginBottom:10 }}>
+                <Sec icon="📈" sub={pvOn?`Today's ₹ at ${inf}% inflation`:"With increments, DA & revisions"}>Salary Growth</Sec>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <ComposedChart data={R.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="year" stroke={T.textMuted} fontSize={11} fontWeight={600} />
-                    <YAxis stroke={T.textMuted} fontSize={11} tickFormatter={fmt} />
-                    <Tooltip content={<TT />} /><Legend wrapperStyle={{ fontSize: 12, fontWeight: 600, color: T.textDim }} />
-                    <Area type="monotone" dataKey={pvOn ? "annSalPV" : "annSal"} name={pvOn ? "Annual (Today's ₹)" : "Annual Salary"} fill="rgba(52,211,153,0.08)" stroke={T.aps} strokeWidth={2.5} />
-                    <Line type="monotone" dataKey="basic" name="Basic" stroke={T.acc} strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="da" name="DA" stroke={T.nps} strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
-                    {R.data.filter(d => d.isRev).map(d => <ReferenceLine key={d.year} x={d.year} stroke="rgba(248,113,113,0.25)" strokeDasharray="3 3" label={{ value: "Rev", position: "top", style: { fontSize: 9, fill: T.dan, fontWeight: 700 } }} />)}
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <XAxis dataKey="year" stroke={T.textMuted} fontSize={9} tickFormatter={v=>mob?`'${String(v).slice(2)}`:v}/>
+                    <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
+                    <Area type="monotone" dataKey={pvOn?"annSalPV":"annSal"} name="Annual Salary" fill="rgba(52,211,153,0.08)" stroke={T.aps} strokeWidth={2}/>
+                    <Line type="monotone" dataKey="basic" name="Basic" stroke={T.acc} strokeWidth={1.5} dot={false}/>
+                    {R.data.filter(d=>d.isRev).map(d=><ReferenceLine key={d.year} x={d.year} stroke="rgba(248,113,113,0.18)" strokeDasharray="3 3"/>)}
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ ...glass, padding: 28 }}>
-                <Sec icon="🏦" sub={`Return: ${npsRet}% · Emp 10% + Govt ${govPct}%`}>NPS Corpus</Sec>
-                <ResponsiveContainer width="100%" height={340}>
+              <div style={{ ...glass, padding:pad }}>
+                <Sec icon="🏦" sub={`Return: ${npsRet}%`}>NPS Corpus Growth</Sec>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <AreaChart data={R.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="year" stroke={T.textMuted} fontSize={11} fontWeight={600} />
-                    <YAxis stroke={T.textMuted} fontSize={11} tickFormatter={fmt} />
-                    <Tooltip content={<TT />} /><Legend wrapperStyle={{ fontSize: 12, fontWeight: 600, color: T.textDim }} />
-                    <Area type="monotone" dataKey={pvOn ? "corpusPV" : "corpus"} name={pvOn ? "Corpus (Today's ₹)" : "NPS Corpus"} fill="rgba(251,146,60,0.08)" stroke={T.nps} strokeWidth={2.5} />
-                    <Area type="monotone" dataKey="totC" name="Contributions" fill="rgba(96,165,250,0.05)" stroke={T.acc} strokeWidth={1.5} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <XAxis dataKey="year" stroke={T.textMuted} fontSize={9} tickFormatter={v=>mob?`'${String(v).slice(2)}`:v}/>
+                    <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
+                    <Area type="monotone" dataKey={pvOn?"corpusPV":"corpus"} name="NPS Corpus" fill="rgba(251,146,60,0.08)" stroke={T.nps} strokeWidth={2}/>
+                    <Area type="monotone" dataKey="totC" name="Contributions" fill="rgba(96,165,250,0.05)" stroke={T.acc} strokeWidth={1.5}/>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          {/* ═══ POST-RETIRE TAB ═══ */}
-          {tab === "pension" && (
+          {/* ── POST-RETIRE ──────────────────────────────────── */}
+          {tab==="pension"&&(
             <div>
-              <div style={{ ...glass, padding: 28, marginBottom: 20 }}>
-                <Sec icon="📊" sub={`APS: +${postDR}% DR/yr · NPS: Fixed${pvOn ? ` · ${inf}% inflation adj` : ""}`}>Monthly Pension After Retirement</Sec>
-                <ResponsiveContainer width="100%" height={340}>
+              <div style={{ ...glass, padding:pad, marginBottom:10 }}>
+                <Sec icon="📊" sub={`APS: +${postDR}%/yr · NPS: Fixed`}>Monthly Pension</Sec>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <LineChart data={R.post}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="label" stroke={T.textMuted} fontSize={11} fontWeight={600} />
-                    <YAxis stroke={T.textMuted} fontSize={11} tickFormatter={fmt} />
-                    <Tooltip content={<TT />} /><Legend wrapperStyle={{ fontSize: 12, fontWeight: 600, color: T.textDim }} />
-                    <Line type="monotone" dataKey={pvOn ? "apsPV" : "apsP"} name={pvOn ? "APS (Today's ₹)" : "APS Pension"} stroke={T.aps} strokeWidth={3} dot={false} />
-                    <Line type="monotone" dataKey={pvOn ? "npsPV" : "npsP"} name={pvOn ? "NPS (Today's ₹)" : "NPS Pension"} stroke={T.nps} strokeWidth={3} dot={false} strokeDasharray="8 4" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <XAxis dataKey="label" stroke={T.textMuted} fontSize={9}/>
+                    <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
+                    <Line type="monotone" dataKey={pvOn?"apsPV":"apsP"} name="APS" stroke={T.aps} strokeWidth={2.5} dot={false}/>
+                    <Line type="monotone" dataKey={pvOn?"npsPV":"npsP"} name="NPS" stroke={T.nps} strokeWidth={2.5} dot={false} strokeDasharray="6 3"/>
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ ...glass, padding: 28, marginBottom: 20 }}>
+              <div style={{ ...glass, padding:pad, marginBottom:10 }}>
                 <Sec icon="💰">Cumulative Pension</Sec>
-                <ResponsiveContainer width="100%" height={340}>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <AreaChart data={R.post}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="label" stroke={T.textMuted} fontSize={11} fontWeight={600} />
-                    <YAxis stroke={T.textMuted} fontSize={11} tickFormatter={fmt} />
-                    <Tooltip content={<TT />} /><Legend wrapperStyle={{ fontSize: 12, fontWeight: 600, color: T.textDim }} />
-                    <Area type="monotone" dataKey={pvOn ? "cAP" : "cA"} name={pvOn ? "APS (Today's ₹)" : "APS Total"} fill="rgba(52,211,153,0.06)" stroke={T.aps} strokeWidth={2.5} />
-                    <Area type="monotone" dataKey={pvOn ? "cNP" : "cN"} name={pvOn ? "NPS (Today's ₹)" : "NPS Total"} fill="rgba(251,146,60,0.05)" stroke={T.nps} strokeWidth={2.5} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <XAxis dataKey="label" stroke={T.textMuted} fontSize={9}/>
+                    <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
+                    <Tooltip content={<TT/>}/><Legend wrapperStyle={{fontSize:10,color:T.textDim}}/>
+                    <Area type="monotone" dataKey={pvOn?"cAP":"cA"} name="APS Total" fill="rgba(52,211,153,0.06)" stroke={T.aps} strokeWidth={2}/>
+                    <Area type="monotone" dataKey={pvOn?"cNP":"cN"} name="NPS Total" fill="rgba(251,146,60,0.05)" stroke={T.nps} strokeWidth={2}/>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ ...glass, padding: 28 }}>
+              <div style={{ ...glass, padding:pad }}>
                 <Sec icon="📐">APS Advantage</Sec>
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer width="100%" height={mob?190:250}>
                   <BarChart data={R.post}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="label" stroke={T.textMuted} fontSize={11} fontWeight={600} />
-                    <YAxis stroke={T.textMuted} fontSize={11} tickFormatter={fmt} />
-                    <Tooltip content={<TT />} />
-                    <Bar dataKey={pvOn ? "advPV" : "adv"} name="APS Advantage" radius={[8, 8, 0, 0]}>
-                      {R.post.map((e, i) => <Cell key={i} fill={(pvOn ? e.advPV : e.adv) >= 0 ? T.aps : T.nps} fillOpacity={0.15 + (i / 25) * 0.5} />)}
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+                    <XAxis dataKey="label" stroke={T.textMuted} fontSize={9}/>
+                    <YAxis stroke={T.textMuted} fontSize={9} tickFormatter={fmt} width={52}/>
+                    <Tooltip content={<TT/>}/>
+                    <Bar dataKey={pvOn?"advPV":"adv"} name="APS Advantage" radius={[5,5,0,0]}>
+                      {R.post.map((e,i)=><Cell key={i} fill={(pvOn?e.advPV:e.adv)>=0?T.aps:T.nps} fillOpacity={0.2+(i/25)*0.5}/>)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-                {R.brk && R.apsP > R.npsP && <div style={{ marginTop: 16 }}><Note type="ok"><strong>Insight:</strong> APS recovers the {fmt(R.lump)} NPS lump sum in ~<strong>{R.brk} years</strong> through higher pension + DR indexation.</Note></div>}
+                {R.brk&&R.apsP>R.npsP&&<div style={{marginTop:10}}><Note type="ok"><strong>Insight:</strong> APS recovers {fmt(R.lump)} NPS lump sum in ~<strong>{R.brk} years</strong>.</Note></div>}
               </div>
             </div>
           )}
 
-          {/* ═══ TABLE TAB ═══ */}
-          {tab === "table" && (
-            <div style={{ ...glass, padding: 28 }}>
-              <Sec icon="📋" sub={`NPS: Emp 10% + Govt ${govPct}% of (Basic+DA) · DA: ${annualDA}%/yr · Inc: ${incRate}%`}>Year-wise Breakdown</Sec>
-              <div style={{ overflowX: "auto", borderRadius: 14 }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 950 }}>
+          {/* ── TABLE ────────────────────────────────────────── */}
+          {tab==="table"&&(
+            <div style={{ ...glass, padding:pad }}>
+              <Sec icon="📋">Year-wise Breakdown</Sec>
+              <div style={{ overflowX:"auto", borderRadius:9, WebkitOverflowScrolling:"touch" }}>
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:10, minWidth:640 }}>
                   <thead>
-                    <tr>{["Year", "Svc", "Basic", "DA%", "DA", "Gross", "NPS Emp", "NPS Govt", "Monthly", "Corpus", ...(pvOn ? ["PV"] : [])].map(h => (
-                      <th key={h} style={{ padding: "14px 8px", textAlign: "right", color: T.textMuted, fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.8, whiteSpace: "nowrap", borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    <tr>{["Year","Svc","Basic","DA%","Gross","Emp","Govt","Monthly","Corpus",...(pvOn?["PV"]:[])].map(h=>(
+                      <th key={h} style={{padding:"9px 6px",textAlign:"right",color:T.textMuted,fontWeight:700,fontSize:8,textTransform:"uppercase",letterSpacing:0.5,whiteSpace:"nowrap",borderBottom:`1px solid ${T.border}`}}>{h}</th>
                     ))}</tr>
                   </thead>
                   <tbody>
-                    {R.data.map((r, i) => (
-                      <tr key={i} style={{ borderBottom: `1px solid rgba(255,255,255,0.03)`, background: r.isRev ? T.accGlow : "transparent" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
-                        onMouseLeave={e => e.currentTarget.style.background = r.isRev ? T.accGlow : "transparent"}>
-                        <td style={{ padding: "11px 8px", textAlign: "right", fontWeight: r.isRev ? 700 : 500, color: r.isRev ? T.acc : T.text }}>{r.year}{r.isRev && <span style={{ fontSize: 9, display: "block", color: T.acc }}>★ Rev</span>}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.textMuted }}>{r.svc}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", fontWeight: 600, color: T.text }}>{fmtF(r.basic)}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.nps, fontWeight: 600 }}>{r.daPct}%</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.textDim }}>{fmtF(r.da)}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.aps, fontWeight: 700 }}>{fmtF(r.gross)}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.textDim }}>{fmtF(r.nE)}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.textDim }}>{fmtF(r.nG)}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.acc, fontWeight: 600 }}>{fmtF(r.mC)}</td>
-                        <td style={{ padding: "11px 8px", textAlign: "right", color: T.nps, fontWeight: 700 }}>{fmt(r.corpus)}</td>
-                        {pvOn && <td style={{ padding: "11px 8px", textAlign: "right", color: T.textMuted }}>{fmt(r.corpusPV)}</td>}
+                    {R.data.map((r,i)=>(
+                      <tr key={i} style={{borderBottom:`1px solid rgba(255,255,255,0.03)`,background:r.isRev?T.accGlow:"transparent"}}>
+                        <td style={{padding:"8px 6px",textAlign:"right",fontWeight:r.isRev?700:500,color:r.isRev?T.acc:T.text,fontSize:11}}>{r.year}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.textMuted}}>{r.svc}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",fontWeight:600,color:T.text}}>{fmtF(r.basic)}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.nps,fontWeight:600}}>{r.daPct}%</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.aps,fontWeight:700}}>{fmtF(r.gross)}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.textDim}}>{fmtF(r.nE)}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.textDim}}>{fmtF(r.nG)}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.acc,fontWeight:600}}>{fmtF(r.mC)}</td>
+                        <td style={{padding:"8px 6px",textAlign:"right",color:T.nps,fontWeight:700}}>{fmt(r.corpus)}</td>
+                        {pvOn&&<td style={{padding:"8px 6px",textAlign:"right",color:T.textMuted}}>{fmt(r.corpusPV)}</td>}
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr style={{ borderTop: `2px solid ${T.borderLight}` }}>
-                      <td colSpan={6} style={{ padding: "14px 8px", textAlign: "right", fontWeight: 700, color: T.text }}>Totals →</td>
-                      <td style={{ padding: "14px 8px", textAlign: "right", fontWeight: 700, color: T.acc }}>{fmt(R.empC)}</td>
-                      <td style={{ padding: "14px 8px", textAlign: "right", fontWeight: 700, color: T.acc }}>{fmt(R.govC)}</td>
-                      <td style={{ padding: "14px 8px", textAlign: "right", fontWeight: 800, color: T.acc }}>{fmt(R.totC)}</td>
-                      <td style={{ padding: "14px 8px", textAlign: "right", fontWeight: 800, color: T.nps, fontSize: 14 }}>{fmt(R.fC)}</td>
-                      {pvOn && <td style={{ padding: "14px 8px", textAlign: "right", fontWeight: 700, color: T.textMuted }}>{fmt(Math.round(R.fC * R.rIA))}</td>}
+                    <tr style={{borderTop:`2px solid ${T.borderLight}`}}>
+                      <td colSpan={5} style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.text}}>Totals →</td>
+                      <td style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.acc}}>{fmt(R.empC)}</td>
+                      <td style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.acc}}>{fmt(R.govC)}</td>
+                      <td style={{padding:"10px 6px",textAlign:"right",fontWeight:800,color:T.acc}}>{fmt(R.totC)}</td>
+                      <td style={{padding:"10px 6px",textAlign:"right",fontWeight:800,color:T.nps}}>{fmt(R.fC)}</td>
+                      {pvOn&&<td style={{padding:"10px 6px",textAlign:"right",fontWeight:700,color:T.textMuted}}>{fmt(Math.round(R.fC*R.rIA))}</td>}
                     </tr>
                   </tfoot>
                 </table>
               </div>
             </div>
           )}
-          </>)}
+        </>)}
 
-          {/* Disclaimer */}
-          <div style={{
-            marginTop: 28, padding: "18px 24px", borderRadius: 18, fontSize: 12, color: T.textMuted, lineHeight: 1.8,
-            background: "rgba(255,255,255,0.02)", backdropFilter: "blur(20px)", border: `1px solid ${T.border}`,
-          }}>
-            <strong style={{ color: T.textDim }}>⚠️ Disclaimer:</strong> Illustrative comparison tool. Actual amounts depend on pay scales, promotions, DA rates, NPS performance & policy. Revisions marked * are projections using Basic+DA merge + 6–7% fitment. <strong>No DCRG in Kerala under APS or NPS.</strong> 12th Pay Rev (Jun 2026): Fitment 1.38× on Basic, balance DA 4%. Subsequent revisions every 5 years: (Basic+DA) × fitment. Inflation-adjusted at {inf}%. Consult your pension section for official calculations.
-          </div>
+        {/* ── DISCLAIMER ───────────────────────────────────────── */}
+        <div style={{ marginTop:12, padding:"12px 16px", borderRadius:13, fontSize:11, color:T.textMuted, lineHeight:1.7, background:"rgba(255,255,255,0.02)", border:`1px solid ${T.border}` }}>
+          <strong style={{color:T.textDim}}>⚠️ {lang==="ml"?"നിരാകരണം":"Disclaimer"}:</strong> {t.disclaimer}
         </div>
       </div>
     </div>
