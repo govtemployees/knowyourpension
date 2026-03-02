@@ -150,10 +150,11 @@ function simulate(p) {
   const data = [];
   let basic  = p.basic;
   let daPct  = p.currentDA;
-  let corpus = p.existingCorpus || 0; // start from existing corpus
+  let corpus = p.existingCorpus || 0;
   let empC = 0, govC = 0;
 
-  for (let yr = p.joinYear; yr < retYear; yr++) {
+  // Loop from 2026 (current year) - user enters current basic, past years in existingCorpus
+  for (let yr = CUR; yr < retYear; yr++) {
     const svc = yr - p.joinYear + 1;
     const rev = REVISIONS.find(r => r.year === yr);
     if (rev && yr >= 2026) {
@@ -460,12 +461,6 @@ export default function App() {
         {/* ── CONFIGURE ────────────────────────────────────────── */}
         <div style={{ ...glass, padding:pad, marginBottom:12 }}>
           <Sec icon="⚙️" sub={t.configureSub}>{t.configure}</Sec>
-
-          {/* Retirement month banner */}
-          <div style={{ marginBottom:14, padding:"9px 13px", borderRadius:9, background:"rgba(96,165,250,0.06)", border:"1px solid rgba(96,165,250,0.14)", fontSize:12, color:"#93c5fd", display:"flex", gap:7, alignItems:"center", flexWrap:"wrap" }}>
-            <span>🗓️</span>
-            <span>{t.retireNote} — <strong style={{color:T.acc}}>{lang==="ml"?"വിരമിക്കൽ: ":"Retirement: "}{retMonthName} {retYearCalc}</strong></span>
-          </div>
 
           <div style={{ display:"grid", gridTemplateColumns:gCol, gap:11 }}>
             <DOBSelector value={dob} onChange={setDob} label={t.dob}/>
