@@ -547,7 +547,7 @@ export default function App() {
                     <GlassInput label={t.annuityRate} value={annRate} onChange={setAnnRate} min={0} max={10} step={0.5} suffix="%"/>
                     <GlassInput label={t.postDR} value={postDR} onChange={setPostDR} min={0} max={10} step={0.5} suffix="%"/>
                     <GlassInput label={t.inflation} value={inf} onChange={setInf} min={0} max={15} step={0.5} suffix="%"/>
-                  </ চরম> : <>
+                 </> : <>
                     <DOBSelector value={dobB} onChange={setDobB} label={t.dob}/>
                     <JoinYearSelector value={joinYearB} onChange={setJoinYearB} label={t.joinYear}/>
                     <GlassInput label={t.basicPay} value={basicB} onChange={setBasicB} min={0} max={500000} suffix="₹" helpText="Current basic"/>
