@@ -237,25 +237,13 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ Theme ════════════════════════════════════════════════════════════════════
 const T = {
-  bg: "#ffffff", surface: "rgba(255, 255, 255, 0.7)", border: "rgba(0,0,0,0.08)",
+  bg: "linear-gradient(160deg, #2e1065 0%, #7c3aed 20%, #ffffff 50%)", 
+  surface: "rgba(255, 255, 255, 0.7)", border: "rgba(0,0,0,0.08)",
   borderLight: "rgba(0,0,0,0.04)", text: "#111827",
   textDim: "#4b5563", textMuted: "#9ca3af",
   aps: "#111827", nps: "#5b21b6", acc: "#3b82f6", dan: "#ef4444",
   apsGlow: "rgba(17, 24, 39, 0.08)", npsGlow: "rgba(91, 33, 182, 0.12)", accGlow: "rgba(59, 130, 246, 0.1)",
 };
-
-const glass = { 
-  background: T.surface, 
-  backdropFilter: "blur(20px)", 
-  WebkitBackdropFilter: "blur(20px)", 
-  border: `1px solid ${T.border}`, 
-  borderRadius: 24, 
-  boxShadow: "0 10px 40px -10px rgba(0,0,0,0.08)" 
-};
-const glassSm = { ...glass, borderRadius: 16, border: `1px solid ${T.borderLight}` };
-const glassCard = { ...glass, borderRadius: 20, padding: "20px 24px" };
-const selStyle = { width:"100%", padding:"12px 16px", borderRadius:12, background:"rgba(255,255,255,0.5)", border:`1px solid ${T.border}`, color:T.text, fontSize:14, fontWeight:600, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
-
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
   const [v, setV] = useState(false);
@@ -577,7 +565,7 @@ export default function App() {
           </div>
 
           {/* Scenario Results */}
-          {(R || RB) && (
+          {(R || RB) && (background: "linear-gradient(160deg, #2e1065 0%, #7c3aed 20%, #ffffff 50%)"
           <div>
             {/* Summary comparison table */}
             <div style={{ ...glass, padding:pad, marginBottom:10 }}>
