@@ -614,7 +614,7 @@ export default function App() {
             </div>
 
             <div style={{ display:"grid", gridTemplateColumns:mob?"1fr":"1fr 1fr", gap:10, marginBottom:10 }}>
-              <div style={{ ...തീർച്ചയായും! ആ കടും നിറം മാറ്റി കൂടുതൽ പ്രൊഫഷണൽ ആയ ഒരു ലൈറ്റ് തീം (Light Theme) നൽകാം. ഒരു ഫിനാൻസ്/ബാങ്കിംഗ് ആപ്പിന് ഏറ്റവും അനുയോജ്യമായ ക്ലീൻ ലുക്ക് ഇതിലൂടെ ലഭിക്കും.glass, padding:pad }}>
+             <div style={{ ...glass, padding:pad }}>
                 <div style={{ fontSize:13, fontWeight:700, color:T.text, marginBottom:14 }}>🛡️ APS Monthly Pension</div>
                 {[{label:labelA, val:R?.apsP||0, color:"#1a56a0"},{label:labelB, val:RB?.apsP||0, color:"#7c3aed"}].map((b,i)=>(
                   <div key={i} style={{ marginBottom:12 }}>
