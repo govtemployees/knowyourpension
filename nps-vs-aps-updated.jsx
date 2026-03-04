@@ -237,16 +237,24 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ Theme ════════════════════════════════════════════════════════════════════
 const T = {
-  bg: "#fffdf0", surface: "#ffffff", border: "#e5e0d8",
-  borderLight: "#f3f0eb", text: "#2c1e16",
-  textDim: "#6b574a", textMuted: "#a39185",
-  aps: "#16a34a", nps: "#d97706", acc: "#2563eb", dan: "#e11d48",
-  apsGlow: "rgba(22, 163, 74, 0.1)", npsGlow: "rgba(217, 119, 6, 0.1)", accGlow: "rgba(37, 99, 235, 0.1)",
+  bg: "#ffffff", surface: "rgba(255, 255, 255, 0.7)", border: "rgba(0,0,0,0.08)",
+  borderLight: "rgba(0,0,0,0.04)", text: "#111827",
+  textDim: "#4b5563", textMuted: "#9ca3af",
+  aps: "#111827", nps: "#5b21b6", acc: "#3b82f6", dan: "#ef4444",
+  apsGlow: "rgba(17, 24, 39, 0.08)", npsGlow: "rgba(91, 33, 182, 0.12)", accGlow: "rgba(59, 130, 246, 0.1)",
 };
-const glass = { background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)" };
-const glassSm = { ...glass, borderRadius:12, background:"#ffffff", border:`1px solid ${T.borderLight}` };
-const glassCard = { ...glass, borderRadius:14, background:"#ffffff", padding:"16px 18px" };
-const selStyle = { width:"100%", padding:"10px 12px", borderRadius:9, background:"#ffffff", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
+
+const glass = { 
+  background: T.surface, 
+  backdropFilter: "blur(20px)", 
+  WebkitBackdropFilter: "blur(20px)", 
+  border: `1px solid ${T.border}`, 
+  borderRadius: 24, 
+  boxShadow: "0 10px 40px -10px rgba(0,0,0,0.08)" 
+};
+const glassSm = { ...glass, borderRadius: 16, border: `1px solid ${T.borderLight}` };
+const glassCard = { ...glass, borderRadius: 20, padding: "20px 24px" };
+const selStyle = { width:"100%", padding:"12px 16px", borderRadius:12, background:"rgba(255,255,255,0.5)", border:`1px solid ${T.border}`, color:T.text, fontSize:14, fontWeight:600, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
