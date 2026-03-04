@@ -243,6 +243,10 @@ const T = {
   aps: "#059669", nps: "#ea580c", acc: "#4f46e5", dan: "#dc2626",
   apsGlow: "rgba(5, 150, 105, 0.08)", npsGlow: "rgba(234, 88, 12, 0.08)", accGlow: "rgba(79, 70, 229, 0.08)",
 };
+const glass = { background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)" };
+const glassSm = { ...glass, borderRadius:12, background:"#ffffff", border:`1px solid ${T.borderLight}` };
+const glassCard = { ...glass, borderRadius:14, background:"#ffffff", padding:"16px 18px" };
+const selStyle = { width:"100%", padding:"10px 12px", borderRadius:9, background:"#ffffff", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
