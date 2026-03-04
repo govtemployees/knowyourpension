@@ -237,11 +237,11 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ Theme ════════════════════════════════════════════════════════════════════
 const T = {
-  bg: "#f8fafc", surface: "#ffffff", border: "#e2e8f0",
-  borderLight: "#f1f5f9", text: "#0f172a",
-  textDim: "#475569", textMuted: "#94a3b8",
-  aps: "#059669", nps: "#ea580c", acc: "#4f46e5", dan: "#dc2626",
-  apsGlow: "rgba(5, 150, 105, 0.08)", npsGlow: "rgba(234, 88, 12, 0.08)", accGlow: "rgba(79, 70, 229, 0.08)",
+  bg: "#fffdf0", surface: "#ffffff", border: "#e5e0d8",
+  borderLight: "#f3f0eb", text: "#2c1e16",
+  textDim: "#6b574a", textMuted: "#a39185",
+  aps: "#16a34a", nps: "#d97706", acc: "#2563eb", dan: "#e11d48",
+  apsGlow: "rgba(22, 163, 74, 0.1)", npsGlow: "rgba(217, 119, 6, 0.1)", accGlow: "rgba(37, 99, 235, 0.1)",
 };
 const glass = { background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)" };
 const glassSm = { ...glass, borderRadius:12, background:"#ffffff", border:`1px solid ${T.borderLight}` };
