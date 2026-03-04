@@ -237,7 +237,7 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ New Premium Theme (Glassmorphism) ════════════════════════════════════════
 const T = {
-  bg: "linear-gradient(160deg, #2e1065 0%, #7c3aed 20%, #ffffff 50%)",
+  bg: "linear-gradient(180deg, #e0e7ff 0%, #f8fafc 40%, #ffffff 100%)",
   surface: "rgba(255, 255, 255, 0.7)", border: "rgba(0,0,0,0.08)",
   borderLight: "rgba(0,0,0,0.04)", text: "#111827",
   textDim: "#4b5563", textMuted: "#9ca3af",
