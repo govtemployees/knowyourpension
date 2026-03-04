@@ -246,17 +246,16 @@ const T = {
 };
 
 const glass = { 
-  background: T.surface, 
-  backdropFilter: "blur(20px)", 
-  WebkitBackdropFilter: "blur(20px)", 
-  border: `1px solid ${T.border}`, 
+  background: "rgba(255, 255, 255, 0.25)", 
+  backdropFilter: "blur(18px)", 
+  WebkitBackdropFilter: "blur(18px)", 
+  border: "1px solid rgba(255, 255, 255, 0.6)", 
   borderRadius: 24, 
-  boxShadow: "0 10px 40px -10px rgba(0,0,0,0.08)" 
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.04)" 
 };
-const glassSm = { ...glass, borderRadius: 16, border: `1px solid ${T.borderLight}` };
+const glassSm = { ...glass, borderRadius: 16, border: "1px solid rgba(255, 255, 255, 0.4)" };
 const glassCard = { ...glass, borderRadius: 20, padding: "20px 24px" };
-const selStyle = { width:"100%", padding:"12px 16px", borderRadius:12, background:"rgba(255,255,255,0.5)", border:`1px solid ${T.border}`, color:T.text, fontSize:14, fontWeight:600, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
-
+const selStyle = { width:"100%", padding:"12px 16px", borderRadius:12, background:"rgba(255,255,255,0.3)", border:"1px solid rgba(255, 255, 255, 0.5)", color:T.text, fontSize:14, fontWeight:600, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
   const [v, setV] = useState(false);
@@ -588,7 +587,7 @@ export default function App() {
                       { label:"Last Basic Pay",    a:R?R.lB:null,   b:RB?RB.lB:null,   isNum:true },
                       { label:"APS Monthly",       a:R?R.apsP:null, b:RB?RB.apsP:null, isNum:true, highlight:true },
                       { label:"NPS Monthly",       a:R?R.npsP:null, b:RB?RB.npsP:null, isNum:true, highlight:true },
-                      { label:"NPS Corpus",        a:R?R.fC:null,   b:RB?RB.fC:null,   isNum:true },
+                      { label:"തീർച്ചയായും! ആ കടും നിറം മാറ്റി കൂടുതൽ പ്രൊഫഷണൽ ആയ ഒരു ലൈറ്റ് തീം (Light Theme) നൽകാം. ഒരു ഫിനാൻസ്/ബാങ്കിംഗ് ആപ്പിന് ഏറ്റവും അനുയോജ്യമായ ക്ലീൻ ലുക്ക് ഇതിലൂടെ ലഭിക്കും.NPS Corpus",        a:R?R.fC:null,   b:RB?RB.fC:null,   isNum:true },
                       { label:"NPS Lump Sum (60%)",a:R?R.lump:null, b:RB?RB.lump:null, isNum:true },
                       { label:"Total Contributions",a:R?R.totC:null,b:RB?RB.totC:null, isNum:true },
                     ].map((row,i)=>{
@@ -615,7 +614,7 @@ export default function App() {
             </div>
 
             <div style={{ display:"grid", gridTemplateColumns:mob?"1fr":"1fr 1fr", gap:10, marginBottom:10 }}>
-              <div style={{ ...glass, padding:pad }}>
+              <div style={{ ...തീർച്ചയായും! ആ കടും നിറം മാറ്റി കൂടുതൽ പ്രൊഫഷണൽ ആയ ഒരു ലൈറ്റ് തീം (Light Theme) നൽകാം. ഒരു ഫിനാൻസ്/ബാങ്കിംഗ് ആപ്പിന് ഏറ്റവും അനുയോജ്യമായ ക്ലീൻ ലുക്ക് ഇതിലൂടെ ലഭിക്കും.glass, padding:pad }}>
                 <div style={{ fontSize:13, fontWeight:700, color:T.text, marginBottom:14 }}>🛡️ APS Monthly Pension</div>
                 {[{label:labelA, val:R?.apsP||0, color:"#1a56a0"},{label:labelB, val:RB?.apsP||0, color:"#7c3aed"}].map((b,i)=>(
                   <div key={i} style={{ marginBottom:12 }}>
