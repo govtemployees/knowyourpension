@@ -237,16 +237,12 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ Theme ════════════════════════════════════════════════════════════════════
 const T = {
-  bg:"#f0f4f8", surface:"#ffffff", border:"#d1d9e0",
-  borderLight:"#b8c4ce", text:"#1a2332",
-  textDim:"#4a5568", textMuted:"#8a9bb0",
-  aps:"#0a7c4e", nps:"#c05000", acc:"#1a56a0", dan:"#c0392b",
-  apsGlow:"rgba(10,124,78,0.08)", npsGlow:"rgba(192,80,0,0.08)", accGlow:"rgba(26,86,160,0.08)",
+  bg: "#f8fafc", surface: "#ffffff", border: "#e2e8f0",
+  borderLight: "#f1f5f9", text: "#0f172a",
+  textDim: "#475569", textMuted: "#94a3b8",
+  aps: "#059669", nps: "#ea580c", acc: "#4f46e5", dan: "#dc2626",
+  apsGlow: "rgba(5, 150, 105, 0.08)", npsGlow: "rgba(234, 88, 12, 0.08)", accGlow: "rgba(79, 70, 229, 0.08)",
 };
-const glass = { background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, boxShadow:"0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)" };
-const glassSm = { ...glass, borderRadius:12, background:"#ffffff", border:`1px solid ${T.borderLight}` };
-const glassCard = { ...glass, borderRadius:14, background:"#ffffff", padding:"16px 18px" };
-const selStyle = { width:"100%", padding:"10px 12px", borderRadius:9, background:"#ffffff", border:`1px solid ${T.border}`, color:T.text, fontSize:13, fontWeight:500, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
