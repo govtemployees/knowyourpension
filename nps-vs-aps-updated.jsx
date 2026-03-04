@@ -237,25 +237,25 @@ function Anim({ value, format=fmtF }) {
 
 // ═══ New Premium Theme (Glassmorphism) ════════════════════════════════════════
 const T = {
-  bg: "linear-gradient(180deg, #e0e7ff 0%, #f8fafc 40%, #ffffff 100%)",
-  surface: "rgba(255, 255, 255, 0.7)", border: "rgba(0,0,0,0.08)",
-  borderLight: "rgba(0,0,0,0.04)", text: "#111827",
-  textDim: "#4b5563", textMuted: "#9ca3af",
-  aps: "#111827", nps: "#5b21b6", acc: "#3b82f6", dan: "#ef4444",
-  apsGlow: "rgba(17, 24, 39, 0.08)", npsGlow: "rgba(91, 33, 182, 0.12)", accGlow: "rgba(59, 130, 246, 0.1)",
+  bg: "linear-gradient(135deg, #c7d2fe 0%, #e2e8f0 50%, #ddd6fe 100%)", 
+  surface: "rgba(255, 255, 255, 0.4)", border: "rgba(255,255,255,0.6)",
+  borderLight: "rgba(255,255,255,0.3)", text: "#0f172a",
+  textDim: "#334155", textMuted: "#64748b",
+  aps: "#0f172a", nps: "#4f46e5", acc: "#2563eb", dan: "#dc2626",
+  apsGlow: "rgba(15, 23, 42, 0.08)", npsGlow: "rgba(79, 70, 229, 0.12)", accGlow: "rgba(37, 99, 235, 0.1)",
 };
 
 const glass = { 
-  background: "rgba(255, 255, 255, 0.25)", 
-  backdropFilter: "blur(18px)", 
-  WebkitBackdropFilter: "blur(18px)", 
+  background: "rgba(255, 255, 255, 0.3)", 
+  backdropFilter: "blur(16px)", 
+  WebkitBackdropFilter: "blur(16px)", 
   border: "1px solid rgba(255, 255, 255, 0.6)", 
   borderRadius: 24, 
-  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.04)" 
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.05)" 
 };
-const glassSm = { ...glass, borderRadius: 16, border: "1px solid rgba(255, 255, 255, 0.4)" };
+const glassSm = { ...glass, borderRadius: 16, border: "1px solid rgba(255, 255, 255, 0.5)" };
 const glassCard = { ...glass, borderRadius: 20, padding: "20px 24px" };
-const selStyle = { width:"100%", padding:"12px 16px", borderRadius:12, background:"rgba(255,255,255,0.3)", border:"1px solid rgba(255, 255, 255, 0.5)", color:T.text, fontSize:14, fontWeight:600, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
+const selStyle = { width:"100%", padding:"12px 16px", borderRadius:12, background:"rgba(255,255,255,0.4)", border:"1px solid rgba(255, 255, 255, 0.6)", color:T.text, fontSize:14, fontWeight:600, outline:"none", fontFamily:"inherit", boxSizing:"border-box", cursor:"pointer", appearance:"none", WebkitAppearance:"none" };
 // ═══ Components ══════════════════════════════════════════════════════════════
 function GlassStat({ label, value, sub, color, icon, delay=0 }) {
   const [v, setV] = useState(false);
